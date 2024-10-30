@@ -1,4 +1,5 @@
-const OrderService = require("../services/OrderService");
+// const OrderService = require("../services/OrderService");
+import * as OrderService from "~/services/OrderService";
 
 const createOrder = async (req, res) => {
   try {
@@ -35,7 +36,7 @@ const completeOrder = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createOrder,
   getOrderByUser,
   completeOrder,

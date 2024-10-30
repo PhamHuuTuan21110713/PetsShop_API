@@ -1,5 +1,7 @@
-const Product = require("../models/ProductModel");
-const cloudinary = require("cloudinary").v2;
+// const Product = require("../models/ProductModel");
+// const cloudinary = require("cloudinary").v2;
+import Product from "~/models/ProductModel";
+import { v2 as cloudinary } from "cloudinary";
 
 const createProduct = (data, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -222,7 +224,7 @@ const deleteProduct = (productId) => {
   });
 };
 
-module.exports = {
+export {
   createProduct,
   addThumbnail,
   getProducts,

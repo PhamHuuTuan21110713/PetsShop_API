@@ -1,6 +1,6 @@
-const ProductRouter = require("./ProductRouter");
-const UserRouter = require("./UserRouter");
-const OrderRouter = require("./OrderRouter");
+import ProductRouter from "./ProductRouter";
+import UserRouter from "./UserRouter";
+import OrderRouter from "./OrderRouter";
 
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
@@ -8,4 +8,4 @@ const routes = (app) => {
   app.use("/api/order", OrderRouter);
 };
 
-module.exports = routes;
+export default routes;

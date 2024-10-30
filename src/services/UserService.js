@@ -1,10 +1,17 @@
-const User = require("../models/UserModel");
-const Order = require("../models/OrderModel");
-const bcrypt = require("bcrypt");
-const cloudinary = require("cloudinary").v2;
-const JWTService = require("./JWTService");
-const nodemailer = require("nodemailer");
-const jwt = require("jsonwebtoken");
+// const User = require("../models/UserModel");
+// const Order = require("../models/OrderModel");
+// const bcrypt = require("bcrypt");
+// const cloudinary = require("cloudinary").v2;
+// const JWTService = require("./JWTService");
+// const nodemailer = require("nodemailer");
+// const jwt = require("jsonwebtoken");
+import User from '~/models/UserModel';
+import Order from '~/models/OrderModel';
+import bcrypt from 'bcrypt';
+import { v2 as cloudinary } from "cloudinary";
+import JWTService from './JWTService';
+import nodemailer from 'nodemailer';
+import jwt from 'jsonwebtoken';
 
 const createUser = (data, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -753,7 +760,22 @@ const sendMessage = (data) => {
   });
 };
 
-module.exports = {
+// module.exports = {
+//   createUser,
+//   loginUser,
+//   getAllUser,
+//   getUserById,
+//   updateUser,
+//   deleteUser,
+//   addToCart,
+//   removeFromCart,
+//   payment,
+//   clearCart,
+//   forgotPassword,
+//   resetPassword,
+//   sendMessage,
+// };
+export {
   createUser,
   loginUser,
   getAllUser,

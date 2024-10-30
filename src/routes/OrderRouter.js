@@ -1,6 +1,9 @@
-const express = require("express");
+// const express = require("express");
+// const router = express.Router();
+// const OrderController = require("../controllers/OrderController");
+import express from "express";
 const router = express.Router();
-const OrderController = require("../controllers/OrderController");
+import * as OrderController from "~/controllers/OrderController";
 const {
   authAdminMiddleware,
   authUserMiddleware,

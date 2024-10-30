@@ -1,7 +1,11 @@
-const UserService = require("../services/UserService");
-const JWTService = require("../services/JWTService");
-const cloudinary = require("cloudinary").v2;
-const useragent = require("useragent");
+// const UserService = require("../services/UserService");
+// const JWTService = require("../services/JWTService");
+// const cloudinary = require("cloudinary").v2;
+// const useragent = require("useragent");
+import * as UserService from "~/services/UserService";
+import JWTService from "~/services/JWTService";
+import { v2 as cloudinary } from "cloudinary";
+import useragent from "useragent";
 
 const createUser = async (req, res) => {
   try {
@@ -228,7 +232,7 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createUser,
   loginUser,
   refreshToken,

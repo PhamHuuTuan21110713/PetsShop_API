@@ -1,5 +1,5 @@
-const ProductService = require("../services/ProductService");
-
+// const ProductService = require("../services/ProductService");
+import * as ProductService from "~/services/ProductService";
 const createProduct = async (req, res) => {
   try {
     const { name, desc, type, price } = req.body;
@@ -118,7 +118,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createProduct,
   addThumbnail,
   getProducts,

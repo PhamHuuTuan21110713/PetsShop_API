@@ -1,11 +1,19 @@
-const express = require("express");
-const dotenv = require("dotenv");
+// const express = require("express");
+// const dotenv = require("dotenv");
+// const routes = require("./routes");
+// const cors = require("cors");
+// const mongoose = require("mongoose");
+// const bodyParser = bodyParser;
+// const cookieParser = cookieParser
+import express from 'express';
+import dotenv from 'dotenv';
+import routes from './routes';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 dotenv.config();
-const mongoose = require("mongoose");
-const routes = require("./routes");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+
 
 const app = express();
 const port = process.env.port || 5000;

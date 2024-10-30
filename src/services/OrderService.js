@@ -1,5 +1,8 @@
-const Order = require("../models/OrderModel");
-const { DateTime } = require("luxon");
+// const Order = require("../models/OrderModel");
+// const { DateTime } = require("luxon");
+
+import Order from "~/models/OrderModel";
+import { DateTime } from "luxon";
 
 const createOrder = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -80,7 +83,7 @@ const completeOrder = (orderId) => {
   });
 };
 
-module.exports = {
+export {
   createOrder,
   getOrderByUser,
   completeOrder,

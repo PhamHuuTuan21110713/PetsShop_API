@@ -1,8 +1,13 @@
-const express = require("express");
+// const express = require("express");
+// const router = express.Router();
+// const ProductController = require("../controllers/ProductController");
+// const { uploadProductCloud } = require("../middlewares/uploadFileMiddleware");
+// const { authAdminMiddleware } = require("../middlewares/authMiddleware");
+import express from "express";
 const router = express.Router();
-const ProductController = require("../controllers/ProductController");
-const { uploadProductCloud } = require("../middlewares/uploadFileMiddleware");
-const { authAdminMiddleware } = require("../middlewares/authMiddleware");
+import * as ProductController from "~/controllers/ProductController";
+import { uploadProductCloud } from "~/middlewares/uploadFileMiddleware";
+import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
 router.post(
   "/create",

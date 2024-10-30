@@ -1,11 +1,17 @@
-const express = require("express");
+// const express = require("express");
+// const router = express.Router();
+// const UserController = require("../controllers/UserController");
+// const { uploadUserCloud } = require("../middlewares/uploadFileMiddleware");
+// const {
+//   authUserMiddleware,
+//   authAdminMiddleware,
+// } = require("../middlewares/authMiddleware");
+
+import express from "express";
 const router = express.Router();
-const UserController = require("../controllers/UserController");
-const { uploadUserCloud } = require("../middlewares/uploadFileMiddleware");
-const {
-  authUserMiddleware,
-  authAdminMiddleware,
-} = require("../middlewares/authMiddleware");
+import * as UserController from "~/controllers/UserController";
+import { uploadUserCloud } from "~/middlewares/uploadFileMiddleware";
+import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
 
 router.post(
   "/register",
@@ -16,7 +22,8 @@ router.post("/login", UserController.loginUser);
 router.post("/forgot-password", UserController.forgotPassword);
 router.patch("/reset-password", UserController.resetPassword);
 router.post("/send-message", UserController.sendMessage);
-router.get("/get-all", authAdminMiddleware, UserController.getAllUser);
+// router.get("/get-all", authAdminMiddleware, UserController.getAllUser);
+router.get("/get-all", UserController.getAllUser);
 router.get("/get-by-id/:id", authUserMiddleware, UserController.getUserById);
 router.patch(
   "/update/:id",
@@ -35,4 +42,4 @@ router.post("/payment/:id", authUserMiddleware, UserController.payment);
 router.patch("/clear-cart/:id", authUserMiddleware, UserController.clearCart);
 router.post("/refresh-token", UserController.refreshToken);
 
-module.exports = router;
+export default router;

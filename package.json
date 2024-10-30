@@ -2,16 +2,14 @@
   "name": "server",
   "version": "1.0.0",
   "main": "src/server.js",
-  "engines": {
-    "node": "20.x"
-  },
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "nodemon --exec babel-node src/server.js",
     "vercel-build": "echo hello"
   },
   "license": "MIT",
   "dependencies": {
+    "@babel/runtime": "^7.26.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cloudinary": "^2.0.3",
@@ -28,6 +26,12 @@
     "useragent": "^2.3.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.25.9",
+    "@babel/core": "^7.26.0",
+    "@babel/node": "^7.26.0",
+    "@babel/plugin-transform-runtime": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
+    "babel-plugin-module-resolver": "^5.0.2",
     "nodemon": "^3.1.0"
   }
 }
