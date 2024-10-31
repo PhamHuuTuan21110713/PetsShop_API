@@ -10,8 +10,8 @@ import { uploadProductCloud } from "~/middlewares/uploadFileMiddleware";
 import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
 router.post(
-  "/create",
-  authAdminMiddleware,
+  "/",
+  //authAdminMiddleware,
   uploadProductCloud.single("image"),
   ProductController.createProduct
 );
@@ -21,16 +21,16 @@ router.patch(
   uploadProductCloud.single("image"),
   ProductController.addThumbnail
 );
-router.get("/get", ProductController.getProducts);
-router.get("/get-by-id/:id", ProductController.getProductById);
+router.get("/", ProductController.getProducts);
+router.get("/:id", ProductController.getProductById);
 router.patch(
-  "/update/:id",
+  "/:id",
   authAdminMiddleware,
   uploadProductCloud.single("image"),
   ProductController.updateProduct
 );
 router.delete(
-  "/delete/:id",
+  "/:id",
   authAdminMiddleware,
   ProductController.deleteProduct
 );
