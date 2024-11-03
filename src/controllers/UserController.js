@@ -64,8 +64,8 @@ const loginUser = async (req, res) => {
       httpOnly: true,      // Chỉ cho phép truy cập qua HTTP, không thể truy cập từ JavaScript
       // secure: true,        // Chỉ gửi qua kết nối HTTPS
       sameSite: 'Strict',  // Giúp ngăn CSRF 
-      maxAge: 24 * 60 * 60 * 1000  // Thời gian tồn tại của cookie, ví dụ: 1 ngày
-      // maxAge: 10  // Thời gian tồn tại của cookie, ví dụ: 1 ngày
+      maxAge: 24 * 60 * 60 * 1000  // Thời gian tồn tại của cookie,
+      // maxAge: 10000  // 
 
     })
     return res.status(200).json(response);

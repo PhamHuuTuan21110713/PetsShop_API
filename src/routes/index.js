@@ -3,7 +3,7 @@ import ProductRouter from "./ProductRouter";
 import UserRouter from "./UserRouter";
 import OrderRouter from "./OrderRouter";
 import AuthenRouter from './AuthenRouter';
-
+import reviewRouter from './ReviewRouter';
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/users", UserRouter);
@@ -15,4 +15,4 @@ const routes = (app) => {
 
 };
 
-module.exports = routes;
+export default routes;
