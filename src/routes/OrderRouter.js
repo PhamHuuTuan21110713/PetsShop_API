@@ -21,4 +21,4 @@ router.patch(
   OrderController.completeOrder
 );
 
-module.exports = router;
+export default router;

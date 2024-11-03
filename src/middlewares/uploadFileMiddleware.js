@@ -15,7 +15,7 @@ const userStorage = new CloudinaryStorage({
   cloudinary,
   allowedFormats: ["jpg", "png", "jpeg"],
   params: {
-    folder: "clothingstore/users",
+    folder: "petsshop/users",
   },
 });
 
@@ -23,11 +23,11 @@ const productStorage = new CloudinaryStorage({
   cloudinary,
   allowedFormats: ["jpg", "png", "jpeg"],
   params: {
-    folder: "clothingstore/products",
+    folder: "petsshop/products",
   },
 });
 
 const uploadUserCloud = multer({ storage: userStorage });
 const uploadProductCloud = multer({ storage: productStorage });
 
-module.exports = { uploadUserCloud, uploadProductCloud };
+export { uploadUserCloud, uploadProductCloud };

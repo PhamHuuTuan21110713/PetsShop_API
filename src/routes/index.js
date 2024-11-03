@@ -1,13 +1,18 @@
-import ProductRouter from './ProductRouter.js';
-import UserRouter from './UserRouter.js';
-import OrderRouter from './OrderRouter.js';
-import reviewRouter from './ReviewRouter.js';
+
+import ProductRouter from "./ProductRouter";
+import UserRouter from "./UserRouter";
+import OrderRouter from "./OrderRouter";
+import AuthenRouter from './AuthenRouter';
 
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
-  app.use("/api/user", UserRouter);
+  app.use("/api/users", UserRouter);
   app.use("/api/order", OrderRouter);
+
+  app.use("/api", AuthenRouter);
+
   app.use("/api/review", reviewRouter);
+
 };
 
 module.exports = routes;
