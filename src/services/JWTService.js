@@ -8,7 +8,7 @@ const generateAccessToken = async (payload) => {
       ...payload,
     },
     process.env.ACCESS_TOKEN,
-    { expiresIn: "5m" }
+    { expiresIn: "30s" }
   );
   return access_token;
 };
@@ -25,23 +25,23 @@ const generateRefreshToken = async (payload) => {
 };
 
 const refreshTokenService = (token) => {
+  
   return new Promise((resolve, reject) => {
     try {
       jwt.verify(token, process.env.REFRESH_TOKEN, async (err, user) => {
         if (err) {
-          resolve({
+          reject({
             status: "ERR",
             message: "THE AUTHENTICATION",
           });
         }
+        console.log("Refreshing token")
+        console.log(user);
         const access_token = await generateAccessToken({
           id: user?.id,
-          isAdmin: user?.isAdmin,
+          role: user?.role,
           email: user?.email,
-          avatar: user?.avatar,
-          name: user?.name,
           phone: user?.phone,
-          address: user?.address,
         });
         resolve({
           status: "OK",
@@ -70,9 +70,12 @@ const generateResetPasswordToken = async (email) => {
   return { reset_token, randomNumber };
 };
 
-module.exports = {
+const JWTService = {
   generateAccessToken,
   generateRefreshToken,
   refreshTokenService,
   generateResetPasswordToken,
 };
+
+
+export default JWTService 
