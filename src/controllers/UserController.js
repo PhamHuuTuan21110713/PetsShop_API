@@ -49,7 +49,7 @@ const createUser = async (req, res) => {
     // console.log("err here")
     // console.log(error);
     return res.status(404).json({
-      
+
       message: error,
     });
   }
@@ -61,10 +61,12 @@ const loginUser = async (req, res) => {
     const refresh_token = response.data.refresh_token;
     // console.log("access_token: ", response.data.access_token)
     res.cookie('refresh_token', refresh_token, {
-        httpOnly: true,      // Chỉ cho phép truy cập qua HTTP, không thể truy cập từ JavaScript
-        // secure: true,        // Chỉ gửi qua kết nối HTTPS
-        sameSite: 'Strict',  // Giúp ngăn CSRF (tuỳ chọn)
-        maxAge: 24 * 60 * 60 * 1000  // Thời gian tồn tại của cookie, ví dụ: 1 ngày
+      httpOnly: true,      // Chỉ cho phép truy cập qua HTTP, không thể truy cập từ JavaScript
+      // secure: true,        // Chỉ gửi qua kết nối HTTPS
+      sameSite: 'Strict',  // Giúp ngăn CSRF 
+      maxAge: 24 * 60 * 60 * 1000  // Thời gian tồn tại của cookie, ví dụ: 1 ngày
+      // maxAge: 10  // Thời gian tồn tại của cookie, ví dụ: 1 ngày
+
     })
     return res.status(200).json(response);
   } catch (error) {
@@ -80,13 +82,12 @@ const refreshToken = async (req, res) => {
     const token = req.cookies.refresh_token;
     // console.log("refresh token: ",token)
     if (!token) {
-      return res.status(401).json({
+      return res.status(403).json({
         status: "ERR",
         message: "The token is required",
       });
     }
     const response = await JWTService.refreshTokenService(token);
-    // console.log("refresed_token: ",response.data)
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -246,6 +247,18 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  res.clearCookie('refresh_token', {
+    httpOnly: true,
+    sameSite: 'Strict',
+    secure: true,  // Chỉ dùng nếu bạn đang chạy trên HTTPS
+  });
+  return res.status(200).json({
+    status: "SUCCESS",
+    message: "Refresh token đã được xóa",
+  });
+};
+
 export {
   createUser,
   loginUser,
@@ -261,4 +274,5 @@ export {
   forgotPassword,
   resetPassword,
   sendMessage,
+  logout
 };
