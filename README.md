@@ -1,4 +1,4 @@
-# Clothing store server
+# Pet shop server
 
 This is a server built with Node.js, Express.js, MongoDB, and JWT for authentication.
 
