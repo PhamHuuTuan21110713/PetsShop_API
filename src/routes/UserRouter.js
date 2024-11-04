@@ -19,8 +19,8 @@ router.route('/')
   // .get( UserController.getAllUser)
 
 router.route('/:id')
-  // .get(authUserMiddleware, UserController.getUserById)
-  .get(UserController.getUserById)
+  .get(authUserMiddleware, UserController.getUserById)
+  // .get(UserController.getUserById)
   .delete(authAdminMiddleware, UserController.deleteUser)
   .patch(authUserMiddleware,uploadUserCloud.single("avatar"),UserController.updateUser)
 

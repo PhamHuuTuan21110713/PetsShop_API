@@ -171,7 +171,7 @@ const getUserById = (userId) => {
     try {
       const user = await User.findById(userId);
       if (!user) {
-        resolve({
+        reject({
           status: "ERR",
           message: "Không tìm thấy tài khoản!",
         });
