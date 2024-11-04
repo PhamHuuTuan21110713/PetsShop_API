@@ -82,6 +82,26 @@ const getProductById = async (req, res) => {
   }
 };
 
+const getProductsByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const response = await ProductService.getProductsByCategory(categoryId);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ status: "ERR", message: error.message });
+  }
+};
+
+const getProductsByType = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const response = await ProductService.getProductsByType(type);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ status: "ERR", message: error.message });
+  }
+};
+
 const updateProduct = async (req, res) => {
   try {
     const imageFile = req.file;
@@ -123,6 +143,8 @@ export {
   addThumbnail,
   getProducts,
   getProductById,
+  getProductsByCategory,
+  getProductsByType,
   updateProduct,
   deleteProduct,
 };

@@ -15,7 +15,8 @@ const createProduct = (data, imageFile) => {
       sold,
       view,
       rating,
-      size
+      size,
+      category
     } = data;
     try {
       const checkedProduct = await Product.findOne({ name });
@@ -43,7 +44,8 @@ const createProduct = (data, imageFile) => {
           rating,
           img,
           imgPath,
-          size: newSize
+          size: newSize,
+          category
         });
         if (newProduct) {
           resolve({
@@ -164,6 +166,40 @@ const getProductById = (productId) => {
   });
 };
 
+const getProductsByCategory = (categoryId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const products = await Product.find({ category: categoryId });
+      resolve({
+        status: "OK",
+        data: products,
+      });
+    } catch (error) {
+      reject({
+        status: "ERR",
+        message: error.message,
+      });
+    }
+  });
+};
+
+const getProductsByType = (type) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const products = await Product.find({ type });
+      resolve({
+        status: "OK",
+        data: products,
+      });
+    } catch (error) {
+      reject({
+        status: "ERR",
+        message: error.message,
+      });
+    }
+  });
+};
+
 const updateProduct = (data, productId, imageFile) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -232,6 +268,8 @@ export {
   addThumbnail,
   getProducts,
   getProductById,
+  getProductsByCategory,
+  getProductsByType,
   updateProduct,
   deleteProduct,
 };

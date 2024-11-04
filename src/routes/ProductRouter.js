@@ -23,6 +23,8 @@ router.patch(
 );
 router.get("/", ProductController.getProducts);
 router.get("/:id", ProductController.getProductById);
+router.get('/category/:categoryId', ProductController.getProductsByCategory);
+router.get('/type/:type', ProductController.getProductsByType);
 router.patch(
   "/:id",
   authAdminMiddleware,
