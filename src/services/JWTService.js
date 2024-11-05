@@ -77,13 +77,15 @@ const checkToken = (req, res) => {
     token = authorizationHeader.split(' ')[1];
   }
   try {
-    jwt.verify(token,process.env.ACCESS_TOKEN, (err, user) => {
+    jwt.verify(token,process.env.ACCESS_TOKEN,  (err, user) => {
       if(err) {
+        console.log("ko hople: ", err);
         res.status(401).json({
           status: "ERR",
           message: "Token không hợp lệ",
         })
       } else {
+        console.log(" hople")
         res.status(200).json({
           status: "SUCCESS",
           message: "Token hợp lệ",
