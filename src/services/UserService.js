@@ -171,7 +171,7 @@ const getUserById = (userId) => {
     try {
       const user = await User.findById(userId);
       if (!user) {
-        resolve({
+        reject({
           status: "ERR",
           message: "Không tìm thấy tài khoản!",
         });
@@ -190,56 +190,59 @@ const getUserById = (userId) => {
 const updateUser = (userId, data, imageFile) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { name, address, phone } = data;
+      const { name,email, phone, gender,address } = data;
       const checkUserByPhone = await User.findOne({ phone });
       if (checkUserByPhone && checkUserByPhone.phone !== phone) {
-        resolve({
+        reject({
           status: "ERR",
           message: "Số điện thoại đã tồn tại!",
         });
       }
       const user = await User.findById(userId);
       if (!user) {
-        if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
-        resolve({
+        if (imageFile) {
+          cloudinary.uploader.destroy(imageFile.filename);
+          console.log("deleting prev avatar when error")
+        } 
+        reject({
           status: "ERR",
           message: "Tài khoản không tồn tại!",
         });
       }
-      if (user?.avatarPath && imageFile) {
-        var imageID = user.avatarPath;
-        if (imageID) cloudinary.uploader.destroy(imageID);
+      if (user?.avatar.imageId && imageFile) {
+        var imageID = user.avatar.imageId;
+        if (imageID){
+          cloudinary.uploader.destroy(imageID);
+          console.log("deleting prev avatar when have another")
+        } 
       }
-      const avatar = imageFile?.path;
-      const avatarPath = imageFile?.filename;
+      const avatar = {
+        preview: imageFile?.path || user.avatar.preview,
+        imageId: imageFile?.filename || user.avatar.imageId
+      }
       const updatedUser = await User.findByIdAndUpdate(
         userId,
         {
           name,
-          address,
+          email,
           phone,
           avatar,
-          avatarPath,
+          gender,
+          address
         },
-        { new: true }
+        { new: true, runValidators: true}
       );
       const access_token = await JWTService.generateAccessToken({
         id: updatedUser._id,
-        isAdmin: updatedUser.isAdmin,
-        email: updatedUser.email,
-        avatar: updatedUser.avatar,
-        name: updatedUser.name,
+        role: updatedUser.role,
+        email: updatedUser.email,      
         phone: updatedUser.phone,
-        address: updatedUser.address,
       });
       const refresh_token = await JWTService.generateRefreshToken({
         id: updatedUser._id,
-        isAdmin: updatedUser.isAdmin,
+        role: updatedUser.role,
         email: updatedUser.email,
-        avatar: updatedUser.avatar,
-        name: updatedUser.name,
         phone: updatedUser.phone,
-        address: updatedUser.address,
       });
       resolve({
         status: "OK",
@@ -247,18 +250,7 @@ const updateUser = (userId, data, imageFile) => {
         data: {
           access_token,
           refresh_token,
-          user: {
-            _id: updatedUser._id,
-            isAdmin: updatedUser.isAdmin,
-            name: updatedUser.name,
-            email: updatedUser.email,
-            address: updatedUser.address,
-            avatar: updatedUser.avatar,
-            phone: updatedUser.phone,
-            cart: updatedUser.cart,
-            createdAt: updatedUser.createdAt,
-            updatedAt: updatedUser.updatedAt,
-          },
+          user: updatedUser
         },
       });
     } catch (error) {

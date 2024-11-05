@@ -123,8 +123,17 @@ const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const imageFile = req.file;
+    console.log("avatar file: ", imageFile);
     const data = req.body;
     const response = await UserService.updateUser(userId, data, imageFile);
+    const refresh_token = response.data.refresh_token;
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,      
+      // secure: true,        
+      sameSite: 'Strict',  
+      maxAge: 24 * 60 * 60 * 1000  
+      // maxAge: 10000  // 
+    })
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -251,7 +260,7 @@ const logout = async (req, res) => {
   res.clearCookie('refresh_token', {
     httpOnly: true,
     sameSite: 'Strict',
-    secure: true,  // Chỉ dùng nếu bạn đang chạy trên HTTPS
+    // secure: true,  // Chỉ dùng nếu bạn đang chạy trên HTTPS
   });
   return res.status(200).json({
     status: "SUCCESS",

@@ -19,7 +19,7 @@ const generateRefreshToken = async (payload) => {
       ...payload,
     },
     process.env.REFRESH_TOKEN,
-    { expiresIn: "365d" }
+    { expiresIn: "1d" }
   );
   return refresh_token;
 };
@@ -70,11 +70,43 @@ const generateResetPasswordToken = async (email) => {
   return { reset_token, randomNumber };
 };
 
+const checkToken = (req, res) => {
+  const authorizationHeader = req.headers['authorization'];
+  let token = null
+  if(authorizationHeader) {
+    token = authorizationHeader.split(' ')[1];
+  }
+  try {
+    jwt.verify(token,process.env.ACCESS_TOKEN,  (err, user) => {
+      if(err) {
+        console.log("ko hople: ", err);
+        res.status(401).json({
+          status: "ERR",
+          message: "Token không hợp lệ",
+        })
+      } else {
+        console.log(" hople")
+        res.status(200).json({
+          status: "SUCCESS",
+          message: "Token hợp lệ",
+          data: user,
+        })
+      }
+    } )
+  } catch(err) {
+    res.status(401).json({
+      status: "ERR",
+      message: "Token không hợp lệ",
+    })
+  }
+}
+
 const JWTService = {
   generateAccessToken,
   generateRefreshToken,
   refreshTokenService,
   generateResetPasswordToken,
+  checkToken
 };
 
 

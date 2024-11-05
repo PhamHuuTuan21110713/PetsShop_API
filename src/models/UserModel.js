@@ -5,25 +5,30 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     avatar: {
-      path: {
+      preview: {
         type: String,
         required: false,
-        default: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg"
+        default: ""
       },
-      name: {type: String, require: false, default: function() {return this.name}}
+      imageId: {
+        type: String,
+        required: false,
+        default: ""
+      }
     },
     // username: {type: String, required: true},
     password: { type: String, required: true },
     role: { type: String, required: false, default: "user", enum: ["user", "admin"] },
+    gender: { type: String, required: true, enum: ["male", "female", "other"] },
     address: { type: String, required: true },
     shippingAddress: [
       {
-        address: {type: String, required: true},
-        isDefault: {type: Boolean, required:true},
-        note: {type: String, required:false, default: ''}
+        address: { type: String, required: true },
+        isDefault: { type: Boolean, required: true },
+        note: { type: String, required: false, default: '' }
       }
     ],
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, required: true, unique: true, maxlength: 10, minlength: 10 },
     cart: [
       {
         productId: {
@@ -52,7 +57,7 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    state: {type:Number, required: false ,enum: [0 , 1], default:1}
+    state: { type: Number, required: false, enum: [0, 1], default: 1 }
   },
   { timestamps: true }
 );

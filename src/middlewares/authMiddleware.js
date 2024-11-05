@@ -37,7 +37,8 @@ const authAdminMiddleware = (req, res, next) => {
 };
 
 const authUserMiddleware = (req, res, next) => {
-  const token = req.headers.access_token?.split(" ")[1];
+  const authorizationHeader = req.headers['authorization'];
+  const token = authorizationHeader.split(' ')[1];
   if (!token) {
     return res.status(401).json({
       status: "ERR",
@@ -52,7 +53,7 @@ const authUserMiddleware = (req, res, next) => {
         message: "THE AUTHORIZATION",
       });
     }
-    if (user?.isAdmin || user?.id === userId) {
+    if (user?.role === "admin" || user?.id === userId) {
       next();
     } else {
       return res.status(401).json({
