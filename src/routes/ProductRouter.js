@@ -22,9 +22,8 @@ router.patch(
   ProductController.addThumbnail
 );
 router.get("/", ProductController.getProducts);
+router.get('/best-selling-products', ProductController.getBestSellingProducts);
 router.get("/:id", ProductController.getProductById);
-router.get('/category/:categoryId', ProductController.getProductsByCategory);
-router.get('/type/:type', ProductController.getProductsByType);
 router.patch(
   "/:id",
   authAdminMiddleware,
@@ -37,4 +36,4 @@ router.delete(
   ProductController.deleteProduct
 );
 
-module.exports = router;
+export default router;

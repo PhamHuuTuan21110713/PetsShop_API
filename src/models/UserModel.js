@@ -7,20 +7,20 @@ const userSchema = new mongoose.Schema(
     avatar: {
       path: {
         type: String,
-        required: true,
+        required: false,
         default: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg"
       },
-      name: {type: String, require: false}
+      name: {type: String, require: false, default: function() {return this.name}}
     },
-    username: {type: String, required: true},
+    // username: {type: String, required: true},
     password: { type: String, required: true },
-    role: { type: Boolean, required: false, default: "user", enum: ["user", "admin"] },
+    role: { type: String, required: false, default: "user", enum: ["user", "admin"] },
     address: { type: String, required: true },
     shippingAddress: [
       {
-        address: {type: String, required: false, default: function() {return this.address}},
+        address: {type: String, required: true},
         isDefault: {type: Boolean, required:true},
-        note: {type: String, required:false}
+        note: {type: String, required:false, default: ''}
       }
     ],
     phone: { type: String, required: true, unique: true },

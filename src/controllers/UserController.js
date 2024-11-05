@@ -9,7 +9,7 @@ import useragent from "useragent";
 
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, confirm_password, address, phone } =
+    const { name, email, password, confirmPassword, address, phone } =
       req.body;
     const checkEmail = String(email)
       .toLowerCase()
@@ -20,7 +20,7 @@ const createUser = async (req, res) => {
       !name ||
       !email ||
       !password ||
-      !confirm_password ||
+      !confirmPassword ||
       !address ||
       !phone
     ) {
@@ -33,20 +33,23 @@ const createUser = async (req, res) => {
         status: "ERR",
         message: "Email không đúng định dạng!",
       });
-    } else if (password !== confirm_password) {
+    } else if (password !== confirmPassword) {
       res.status(200).json({
         status: "ERR",
         message: "Mật khẩu nhập lại không khớp!",
       });
     } else {
-      const imageFile = req.file;
-      const response = await UserService.createUser(req.body, imageFile);
+      // const imageFile = req.file;
+      const response = await UserService.createUser(req.body);
       return res.status(200).json(response);
     }
   } catch (error) {
-    const imageFile = req.file;
-    if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
+    // const imageFile = req.file;
+    // if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
+    // console.log("err here")
+    // console.log(error);
     return res.status(404).json({
+
       message: error,
     });
   }
@@ -55,6 +58,16 @@ const createUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const response = await UserService.loginUser(req.body);
+    const refresh_token = response.data.refresh_token;
+    // console.log("access_token: ", response.data.access_token)
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,      // Chỉ cho phép truy cập qua HTTP, không thể truy cập từ JavaScript
+      // secure: true,        // Chỉ gửi qua kết nối HTTPS
+      sameSite: 'Strict',  // Giúp ngăn CSRF 
+      maxAge: 24 * 60 * 60 * 1000  // Thời gian tồn tại của cookie,
+      // maxAge: 10000  // 
+
+    })
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -65,9 +78,11 @@ const loginUser = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const token = req.headers.refresh_token?.split(" ")[1];
+    // const token = req.headers.refresh_token?.split(" ")[1];
+    const token = req.cookies.refresh_token;
+    // console.log("refresh token: ",token)
     if (!token) {
-      return res.status(200).json({
+      return res.status(403).json({
         status: "ERR",
         message: "The token is required",
       });
@@ -206,12 +221,12 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { key, token, password, confirm_password } = req.body;
+    const { key, token, password, confirmPassword } = req.body;
     const response = await UserService.resetPassword({
       key,
       token,
       password,
-      confirm_password,
+      confirmPassword,
     });
     return res.status(200).json(response);
   } catch (error) {
@@ -232,6 +247,18 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  res.clearCookie('refresh_token', {
+    httpOnly: true,
+    sameSite: 'Strict',
+    secure: true,  // Chỉ dùng nếu bạn đang chạy trên HTTPS
+  });
+  return res.status(200).json({
+    status: "SUCCESS",
+    message: "Refresh token đã được xóa",
+  });
+};
+
 export {
   createUser,
   loginUser,
@@ -247,4 +274,5 @@ export {
   forgotPassword,
   resetPassword,
   sendMessage,
+  logout
 };

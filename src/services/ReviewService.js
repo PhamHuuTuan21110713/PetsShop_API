@@ -2,11 +2,11 @@ import Review from '../models/ReviewModel.js';
 import Product from '../models/ProductModel.js';
 //import Service from '../models/Service.js';
 
-const createReview = async (entityId, type, user, rating, comment) => {
+const createReview = async (newData) => {
   let entity;
 
-  if (type === 'product') {
-    entity = await Product.findById(entityId);
+  if (newData.type === 'product') {
+    entity = await Product.findById(newData.entityId);
   } 
   // else if (type === 'service') {
   //   entity = await Service.findById(entityId);
@@ -17,7 +17,7 @@ const createReview = async (entityId, type, user, rating, comment) => {
   }
 
   try {
-    const newReview = await Review.create({ entityId, type, user, rating, comment });
+    const newReview = await Review.create(newData);
     
     // Kiểm tra xem đánh giá đã được tạo thành công
     if (newReview) {

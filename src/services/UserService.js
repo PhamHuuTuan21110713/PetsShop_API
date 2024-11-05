@@ -13,10 +13,10 @@ import JWTService from './JWTService';
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
 
-const createUser = (data, imageFile) => {
+const createUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { name, email, password, isAdmin, address, phone, cart } = data;
+      const { name, email, password, address, phone } = data;
       const checkUserByEmail = await User.findOne({
         email,
       });
@@ -24,37 +24,41 @@ const createUser = (data, imageFile) => {
         phone,
       });
       if (checkUserByEmail) {
-        if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
-        resolve({
+        // if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
+        reject({
           status: "ERR",
-          message: "Email đã tồn tại!",
+          message: "Email đã được sử dụng, vui lòng dùng email khác!",
         });
       } else if (checkUserByPhone) {
-        if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
-        resolve({
+        // if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
+        reject({
           status: "ERR",
-          message: "Số điện thoại đã tồn tại!",
+          message: "Số điện thoại đã được sử dụng, vui lòng dùng số khác !",
         });
       } else {
-        const avatar = imageFile?.path;
-        const avatarPath = imageFile?.filename;
+        // const avatar = imageFile?.path;
+        // const avatarPath = imageFile?.filename;
         const hashPassword = bcrypt.hashSync(password, 12);
         const newUser = await User.create({
           name,
           email,
           password: hashPassword,
-          isAdmin,
           address,
+          shippingAddress: [
+            {
+              address,
+              isDefault: true,
+            }
+          ],
           phone,
-          cart,
-          avatar,
-          avatarPath,
+          cart: [],
+          // avatar,
+          // avatarPath,
         });
         const access_token = await JWTService.generateAccessToken({
           id: newUser._id,
           isAdmin: newUser.isAdmin,
           email: newUser.email,
-          avatar: newUser.avatar,
           name: newUser.name,
           phone: newUser.phone,
           address: newUser.address,
@@ -63,7 +67,6 @@ const createUser = (data, imageFile) => {
           id: newUser._id,
           isAdmin: newUser.isAdmin,
           email: newUser.email,
-          avatar: newUser.avatar,
           name: newUser.name,
           phone: newUser.phone,
           address: newUser.address,
@@ -81,11 +84,13 @@ const createUser = (data, imageFile) => {
                 name: newUser.name,
                 email: newUser.email,
                 address: newUser.address,
+                shippingAddress: newUser.shippingAddress,
                 avatar: newUser.avatar,
                 phone: newUser.phone,
                 cart: newUser.cart,
                 createdAt: newUser.createdAt,
                 updatedAt: newUser.updatedAt,
+                state: newUser.state
               },
             },
           });
@@ -103,54 +108,38 @@ const loginUser = (data) => {
       const { email, password } = data;
       const user = await User.findOne({ email });
       if (!user) {
-        resolve({
+        reject({
           status: "ERR",
           message: "Email không tồn tại!",
         });
       }
       const checkPassword = bcrypt.compareSync(password, user.password);
       if (!checkPassword) {
-        resolve({
+        reject({
           status: "ERR",
           message: "Mật khẩu không chính xác!",
         });
       } else {
         const access_token = await JWTService.generateAccessToken({
           id: user._id,
-          isAdmin: user.isAdmin,
+          role: user.role,
           email: user.email,
-          avatar: user.avatar,
-          name: user.name,
           phone: user.phone,
-          address: user.address,
         });
         const refresh_token = await JWTService.generateRefreshToken({
           id: user._id,
-          isAdmin: user.isAdmin,
+          role: user.role,
           email: user.email,
-          avatar: user.avatar,
-          name: user.name,
           phone: user.phone,
-          address: user.address,
         });
+        
         resolve({
           status: "OK",
           message: "Đăng nhập thành công!",
           data: {
             access_token,
             refresh_token,
-            user: {
-              _id: user._id,
-              isAdmin: user.isAdmin,
-              name: user.name,
-              email: user.email,
-              address: user.address,
-              avatar: user.avatar,
-              phone: user.phone,
-              cart: user.cart,
-              createdAt: user.createdAt,
-              updatedAt: user.updatedAt,
-            },
+            user
           },
         });
       }
@@ -671,7 +660,7 @@ const sendMessage = (data) => {
       };
 
       // Send email to user
-      const from = `HeinShop <${process.env.MY_EMAIL}>`;
+      const from = `PestsShop <${process.env.MY_EMAIL}>`;
       const subject = "Thanks for your message!";
       const html = `
         <!DOCTYPE html>
@@ -760,21 +749,6 @@ const sendMessage = (data) => {
   });
 };
 
-// module.exports = {
-//   createUser,
-//   loginUser,
-//   getAllUser,
-//   getUserById,
-//   updateUser,
-//   deleteUser,
-//   addToCart,
-//   removeFromCart,
-//   payment,
-//   clearCart,
-//   forgotPassword,
-//   resetPassword,
-//   sendMessage,
-// };
 export {
   createUser,
   loginUser,

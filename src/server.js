@@ -12,13 +12,18 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(',') || [];
 dotenv.config();
 
 
 const app = express();
 const port = process.env.port || 5000;
 
-app.use(cors());
+app.use(cors({
+  // origin: 'http://localhost:5173', // Địa chỉ frontend của bạn
+  origin: allowedOrigins,
+  credentials: true,               // Để cho phép gửi cookie qua CORS
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());

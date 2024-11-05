@@ -144,6 +144,28 @@ const getProducts = (
   });
 };
 
+const getBestSellingProducts = async (page = 1, limit = 10) => {
+  try {
+      const skip = (page - 1) * limit;
+
+      const filteredProducts = await Product.find({ sold: { $gt: 20 } })
+          .sort({ sold: -1 }) 
+          .skip(skip) 
+          .limit(limit); 
+
+      const total = await Product.countDocuments({ sold: { $gt: 20 } }); 
+
+      return {
+          total,
+          products: filteredProducts,
+          currentPage: Number(page),
+          totalPages: Math.ceil(total / limit),
+      };
+  } catch (error) {
+      throw new Error('Không thể lấy danh sách sản phẩm: ' + error.message);
+  }
+};
+
 const getProductById = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -166,39 +188,6 @@ const getProductById = (productId) => {
   });
 };
 
-const getProductsByCategory = (categoryId) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const products = await Product.find({ category: categoryId });
-      resolve({
-        status: "OK",
-        data: products,
-      });
-    } catch (error) {
-      reject({
-        status: "ERR",
-        message: error.message,
-      });
-    }
-  });
-};
-
-const getProductsByType = (type) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const products = await Product.find({ type });
-      resolve({
-        status: "OK",
-        data: products,
-      });
-    } catch (error) {
-      reject({
-        status: "ERR",
-        message: error.message,
-      });
-    }
-  });
-};
 
 const updateProduct = (data, productId, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -267,9 +256,8 @@ export {
   createProduct,
   addThumbnail,
   getProducts,
+  getBestSellingProducts,
   getProductById,
-  getProductsByCategory,
-  getProductsByType,
   updateProduct,
   deleteProduct,
 };

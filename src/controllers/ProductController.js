@@ -70,6 +70,16 @@ const getProducts = async (req, res) => {
   }
 };
 
+const getBestSellingProducts = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  try {
+      const result = await ProductService.getBestSellingProducts(page, limit);
+      res.json(result);
+  } catch (error) {
+      res.status(500).json({ message: "Lỗi trong việc lấy sản phẩm", error: error.message });
+  }
+};
+
 const getProductById = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -79,26 +89,6 @@ const getProductById = async (req, res) => {
     return res.status(404).json({
       message: error,
     });
-  }
-};
-
-const getProductsByCategory = async (req, res) => {
-  try {
-    const { categoryId } = req.params;
-    const response = await ProductService.getProductsByCategory(categoryId);
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ status: "ERR", message: error.message });
-  }
-};
-
-const getProductsByType = async (req, res) => {
-  try {
-    const { type } = req.params;
-    const response = await ProductService.getProductsByType(type);
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ status: "ERR", message: error.message });
   }
 };
 
@@ -142,9 +132,8 @@ export {
   createProduct,
   addThumbnail,
   getProducts,
+  getBestSellingProducts,
   getProductById,
-  getProductsByCategory,
-  getProductsByType,
   updateProduct,
   deleteProduct,
 };
