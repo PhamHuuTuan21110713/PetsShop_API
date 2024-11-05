@@ -22,6 +22,7 @@ router.patch(
   ProductController.addThumbnail
 );
 router.get("/", ProductController.getProducts);
+router.get('/best-selling-products', ProductController.getBestSellingProducts);
 router.get("/:id", ProductController.getProductById);
 router.patch(
   "/:id",
