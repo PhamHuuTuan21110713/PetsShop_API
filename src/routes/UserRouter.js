@@ -24,7 +24,7 @@ router.route('/:id')
   .delete(authAdminMiddleware, UserController.deleteUser)
   .patch(authUserMiddleware,uploadUserCloud.single("avatar"),UserController.updateUser)
 
-// router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
+/router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
 // router.post("/login", UserController.loginUser);
 router.post("/forgot-password", UserController.forgotPassword);
 router.patch("/reset-password", UserController.resetPassword);

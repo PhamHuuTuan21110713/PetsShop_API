@@ -652,7 +652,7 @@ const sendMessage = (data) => {
       };
 
       // Send email to user
-      const from = `HeinShop <${process.env.MY_EMAIL}>`;
+      const from = `PestsShop <${process.env.MY_EMAIL}>`;
       const subject = "Thanks for your message!";
       const html = `
         <!DOCTYPE html>
