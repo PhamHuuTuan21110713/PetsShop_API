@@ -9,38 +9,33 @@ import * as ProductController from "~/controllers/ProductController";
 import { uploadProductCloud } from "~/middlewares/uploadFileMiddleware";
 import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
-router.route('/')
-  .get(ProductController.getProducts)
-  // router.get("/", ProductController.getProducts);
-  .post(authAdminMiddleware, uploadProductCloud.single("image"), ProductController.createProduct)
-  // router.post(
-  //   "/",
-  //   //authAdminMiddleware,
-  //   uploadProductCloud.single("image"),
-  //   ProductController.createProduct
-  // );
 
-router.route('/:id')
-  .get(ProductController.getProductById)
-  .patch(authAdminMiddleware, uploadProductCloud.single("image"), ProductController.updateProduct)
-  .delete(authAdminMiddleware, ProductController.deleteProduct)
-// router.patch(
-//   "/add-thumbnail/:id",
-//   authAdminMiddleware,
-//   uploadProductCloud.single("image"),
-//   ProductController.addThumbnail
-// );
-// router.get("/:id", ProductController.getProductById);
-// router.patch(
-//   "/:id",
-//   authAdminMiddleware,
-//   uploadProductCloud.single("image"),
-//   ProductController.updateProduct
-// );
-// router.delete(
-//   "/:id",
-//   authAdminMiddleware,
-//   ProductController.deleteProduct
-// );
+router.post(
+  "/",
+  //authAdminMiddleware,
+  uploadProductCloud.single("image"),
+  ProductController.createProduct
+);
+router.patch(
+  "/add-thumbnail/:id",
+  authAdminMiddleware,
+  uploadProductCloud.single("image"),
+  ProductController.addThumbnail
+);
+router.get("/", ProductController.getProducts);
+router.get('/best-selling-products', ProductController.getBestSellingProducts);
+router.get("/:id", ProductController.getProductById);
+router.patch(
+  "/:id",
+  authAdminMiddleware,
+  uploadProductCloud.single("image"),
+  ProductController.updateProduct
+);
+router.delete(
+  "/:id",
+  authAdminMiddleware,
+  ProductController.deleteProduct
+);
+
 
 export default router;

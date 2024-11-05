@@ -15,7 +15,8 @@ const createProduct = (data, imageFile) => {
       sold,
       view,
       rating,
-      size
+      size,
+      category
     } = data;
     try {
       const checkedProduct = await Product.findOne({ name });
@@ -43,7 +44,8 @@ const createProduct = (data, imageFile) => {
           rating,
           img,
           imgPath,
-          size: newSize
+          size: newSize,
+          category
         });
         if (newProduct) {
           resolve({
@@ -142,6 +144,28 @@ const getProducts = (
   });
 };
 
+const getBestSellingProducts = async (page = 1, limit = 10) => {
+  try {
+      const skip = (page - 1) * limit;
+
+      const filteredProducts = await Product.find({ sold: { $gt: 20 } })
+          .sort({ sold: -1 }) 
+          .skip(skip) 
+          .limit(limit); 
+
+      const total = await Product.countDocuments({ sold: { $gt: 20 } }); 
+
+      return {
+          total,
+          products: filteredProducts,
+          currentPage: Number(page),
+          totalPages: Math.ceil(total / limit),
+      };
+  } catch (error) {
+      throw new Error('Không thể lấy danh sách sản phẩm: ' + error.message);
+  }
+};
+
 const getProductById = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -163,6 +187,7 @@ const getProductById = (productId) => {
     }
   });
 };
+
 
 const updateProduct = (data, productId, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -231,6 +256,7 @@ export {
   createProduct,
   addThumbnail,
   getProducts,
+  getBestSellingProducts,
   getProductById,
   updateProduct,
   deleteProduct,

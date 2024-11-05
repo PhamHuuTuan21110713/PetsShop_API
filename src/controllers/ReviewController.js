@@ -1,10 +1,10 @@
 import * as ReviewService from '../services/ReviewService';
 
  const createReview = async (req, res) => {
-  const { entityId, type, user, rating, comment } = req.body;
+  const newData = req.body;
 
   try {
-    const newReview = await ReviewService.createReview(entityId, type, user, rating, comment);
+    const newReview = await ReviewService.createReview(newData);
     return res.status(201).json(newReview);
   } catch (error) {
     res.status(400).json({ error: error.message });

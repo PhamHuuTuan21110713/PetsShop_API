@@ -70,6 +70,16 @@ const getProducts = async (req, res) => {
   }
 };
 
+const getBestSellingProducts = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  try {
+      const result = await ProductService.getBestSellingProducts(page, limit);
+      res.json(result);
+  } catch (error) {
+      res.status(500).json({ message: "Lỗi trong việc lấy sản phẩm", error: error.message });
+  }
+};
+
 const getProductById = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -122,6 +132,7 @@ export {
   createProduct,
   addThumbnail,
   getProducts,
+  getBestSellingProducts,
   getProductById,
   updateProduct,
   deleteProduct,
