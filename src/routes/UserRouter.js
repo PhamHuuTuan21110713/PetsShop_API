@@ -16,22 +16,24 @@ import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddl
 router.route('/')
 
   .get(authAdminMiddleware, UserController.getAllUser)
-  // .get( UserController.getAllUser)
+// .get( UserController.getAllUser)
 
 router.route('/:id')
   .get(authUserMiddleware, UserController.getUserById)
   // .get(UserController.getUserById)
   .delete(authAdminMiddleware, UserController.deleteUser)
-  .patch(authUserMiddleware,uploadUserCloud.single("avatar"),UserController.updateUser)
+  .patch(authUserMiddleware, uploadUserCloud.single("avatar"), UserController.updateUser)
 
-/router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
+router.route('/shipping-address/:id')
+  .patch(authUserMiddleware, UserController.updateShippingAddress)
+// /router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
 // router.post("/login", UserController.loginUser);
 router.post("/forgot-password", UserController.forgotPassword);
 router.patch("/reset-password", UserController.resetPassword);
 router.post("/send-message", UserController.sendMessage);
 
 router.patch("/add-to-cart/:id", authUserMiddleware, UserController.addToCart);
-router.patch("/remove-from-cart/:id",authUserMiddleware,UserController.removeFromCart);
+router.patch("/remove-from-cart/:id", authUserMiddleware, UserController.removeFromCart);
 router.patch("/clear-cart/:id", authUserMiddleware, UserController.clearCart);
 router.post("/payment/:id", authUserMiddleware, UserController.payment);
 

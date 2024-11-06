@@ -256,6 +256,23 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const updateShippingAddress = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const data = req.body;
+    // console.log("userId: ", userId);
+    // console.log("data: ", data);
+    const response = await UserService.updateShippingAddress(userId, data);
+    // console.log("res: ", response);
+    res.status(200).json(response);
+  }catch(err) {
+    return res.status(404).json({
+      message: err
+    })
+  }
+}
+
+
 const logout = async (req, res) => {
   res.clearCookie('refresh_token', {
     httpOnly: true,
@@ -283,5 +300,6 @@ export {
   forgotPassword,
   resetPassword,
   sendMessage,
-  logout
+  logout,
+  updateShippingAddress,
 };

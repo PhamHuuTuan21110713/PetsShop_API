@@ -259,6 +259,38 @@ const updateUser = (userId, data, imageFile) => {
   });
 };
 
+const updateShippingAddress = (userId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        // console.log("mac loi 1")
+        reject({
+          status: "ERR",
+          message: "Tài khoản không tồn tại!",
+        });
+      }
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          shippingAddress: data
+        },
+        { new: true}
+      );
+      resolve({
+        status: "OK",
+        message: "Cập nhật địa chỉ thành công!",
+        data: {
+          user: updatedUser
+        },
+      });
+    } catch (error) {
+      // console.log("macloi2: ", error);
+      reject(error);
+    }
+  });
+}
+
 const deleteUser = (userId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -755,4 +787,5 @@ export {
   forgotPassword,
   resetPassword,
   sendMessage,
+  updateShippingAddress
 };
