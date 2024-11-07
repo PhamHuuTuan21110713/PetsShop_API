@@ -128,10 +128,10 @@ const updateUser = async (req, res) => {
     const response = await UserService.updateUser(userId, data, imageFile);
     const refresh_token = response.data.refresh_token;
     res.cookie('refresh_token', refresh_token, {
-      httpOnly: true,      
+      httpOnly: true,
       // secure: true,        
-      sameSite: 'Strict',  
-      maxAge: 24 * 60 * 60 * 1000  
+      sameSite: 'Strict',
+      maxAge: 24 * 60 * 60 * 1000
       // maxAge: 10000  // 
     })
     return res.status(200).json(response);
@@ -228,6 +228,19 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const checkPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.params.id;
+    const response = await UserService.checkPassword(userId, password);
+    return res.status(200).json({ response })
+  } catch (err) {
+    return res.status(400).json({
+      message: err
+    })
+  }
+}
+
 const resetPassword = async (req, res) => {
   try {
     const { key, token, password, confirmPassword } = req.body;
@@ -265,7 +278,7 @@ const updateShippingAddress = async (req, res) => {
     const response = await UserService.updateShippingAddress(userId, data);
     // console.log("res: ", response);
     res.status(200).json(response);
-  }catch(err) {
+  } catch (err) {
     return res.status(404).json({
       message: err
     })
@@ -302,4 +315,5 @@ export {
   sendMessage,
   logout,
   updateShippingAddress,
+  checkPassword
 };
