@@ -243,13 +243,14 @@ const checkPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { key, token, password, confirmPassword } = req.body;
+    const userId = req.params.id;
+    const { password, confirmPassword } = req.body;
     const response = await UserService.resetPassword({
-      key,
-      token,
+      userId,
       password,
       confirmPassword,
     });
+    console.log("Updated pass: ", response);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({

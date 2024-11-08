@@ -577,9 +577,9 @@ const forgotPassword = (email, operating_system) => {
 const checkPassword = (userId, password) => {
   return new Promise(async (rs, rj) => {
     try {
-     
+
       const user = await User.findById(userId);
-      if(!user) {
+      if (!user) {
         rj({
           status: "ERR",
           message: "Không tìm thấy tài khoản!",
@@ -587,7 +587,7 @@ const checkPassword = (userId, password) => {
       }
       const checkPassword = bcrypt.compareSync(password, user.password);
       // console.log("check-pass: ", checkPassword);
-      if(!checkPassword) {
+      if (!checkPassword) {
         rj({
           status: "ERR",
           message: "Mật khẩu không đúng",
@@ -598,7 +598,7 @@ const checkPassword = (userId, password) => {
           message: "Mật khẩu chính xác"
         })
       }
-    } catch(err) {
+    } catch (err) {
       rj(err);
     }
   })
@@ -607,45 +607,24 @@ const checkPassword = (userId, password) => {
 const resetPassword = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { key, token, password, confirm_password } = data;
-      jwt.verify(token, process.env.ACCESS_TOKEN, async (err, payload) => {
-        if (err) {
-          return resolve({
-            status: "ERR",
-            message: "Yêu cầu đã hết hạn!",
-          });
-        }
-        const user = await User.findOne({ email: payload.email });
-        if (!user) {
-          return resolve({
-            status: "ERR",
-            message: "Email không tồn tại!",
-          });
-        }
-        if (Number(key) !== payload.key) {
-          return resolve({
-            status: "ERR",
-            message: "OTP không chính xác!",
-          });
-        }
-        if (password !== confirm_password) {
-          return resolve({
-            status: "ERR",
-            message: "Mật khẩu nhập lại không khớp!",
-          });
-        }
-        const hashPassword = bcrypt.hashSync(password, 12);
-        await User.findOneAndUpdate(
-          { email: payload.email },
-          {
-            password: hashPassword,
-          },
-          { new: true }
-        );
-        return resolve({
-          status: "OK",
-          message: "Đặt lại mật khẩu thành công!",
+      const { userId, password, confirmPassword } = data;
+      if (password !== confirmPassword) {
+        return reject({
+          status: "ERR",
+          message: "Mật khẩu nhập lại không khớp!",
         });
+      }
+      const hashPassword = bcrypt.hashSync(password, 12);
+      await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          password: hashPassword,
+        },
+        { new: true }
+      );
+      return resolve({
+        status: "OK",
+        message: "Đặt lại mật khẩu thành công!",
       });
     } catch (error) {
       reject(error);

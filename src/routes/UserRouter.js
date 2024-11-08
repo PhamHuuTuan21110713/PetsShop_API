@@ -29,7 +29,7 @@ router.route('/shipping-address/:id')
 // /router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
 // router.post("/login", UserController.loginUser);
 router.post("/check-password/:id",authUserMiddleware, UserController.checkPassword)
-router.patch("/reset-password", UserController.resetPassword);
+router.patch("/reset-password/:id",authUserMiddleware, UserController.resetPassword);
 
 
 router.post("/forgot-password", UserController.forgotPassword);
