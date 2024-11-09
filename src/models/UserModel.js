@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema(
     address: { type: String, required: true },
     shippingAddress: [
       {
+        recipientName: {type: String, required: true},
+        recipientPhone: {type: String, required: true},
         address: { type: String, required: true },
         isDefault: { type: Boolean, required: true },
         note: { type: String, required: false, default: '' }
@@ -61,6 +63,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 const User = mongoose.model("User", userSchema);
 

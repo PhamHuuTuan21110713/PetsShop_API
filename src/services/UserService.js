@@ -132,7 +132,7 @@ const loginUser = (data) => {
           email: user.email,
           phone: user.phone,
         });
-        
+
         resolve({
           status: "OK",
           message: "Đăng nhập thành công!",
@@ -190,7 +190,7 @@ const getUserById = (userId) => {
 const updateUser = (userId, data, imageFile) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { name,email, phone, gender,address } = data;
+      const { name, email, phone, gender, address } = data;
       const checkUserByPhone = await User.findOne({ phone });
       if (checkUserByPhone && checkUserByPhone.phone !== phone) {
         reject({
@@ -203,7 +203,7 @@ const updateUser = (userId, data, imageFile) => {
         if (imageFile) {
           cloudinary.uploader.destroy(imageFile.filename);
           console.log("deleting prev avatar when error")
-        } 
+        }
         reject({
           status: "ERR",
           message: "Tài khoản không tồn tại!",
@@ -211,10 +211,10 @@ const updateUser = (userId, data, imageFile) => {
       }
       if (user?.avatar.imageId && imageFile) {
         var imageID = user.avatar.imageId;
-        if (imageID){
+        if (imageID) {
           cloudinary.uploader.destroy(imageID);
           console.log("deleting prev avatar when have another")
-        } 
+        }
       }
       const avatar = {
         preview: imageFile?.path || user.avatar.preview,
@@ -230,12 +230,12 @@ const updateUser = (userId, data, imageFile) => {
           gender,
           address
         },
-        { new: true, runValidators: true}
+        { new: true, runValidators: true }
       );
       const access_token = await JWTService.generateAccessToken({
         id: updatedUser._id,
         role: updatedUser.role,
-        email: updatedUser.email,      
+        email: updatedUser.email,
         phone: updatedUser.phone,
       });
       const refresh_token = await JWTService.generateRefreshToken({
@@ -258,6 +258,38 @@ const updateUser = (userId, data, imageFile) => {
     }
   });
 };
+
+const updateShippingAddress = (userId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        // console.log("mac loi 1")
+        reject({
+          status: "ERR",
+          message: "Tài khoản không tồn tại!",
+        });
+      }
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          shippingAddress: data
+        },
+        { new: true }
+      );
+      resolve({
+        status: "OK",
+        message: "Cập nhật địa chỉ thành công!",
+        data: {
+          user: updatedUser
+        },
+      });
+    } catch (error) {
+      // console.log("macloi2: ", error);
+      reject(error);
+    }
+  });
+}
 
 const deleteUser = (userId) => {
   return new Promise(async (resolve, reject) => {
@@ -542,48 +574,57 @@ const forgotPassword = (email, operating_system) => {
   });
 };
 
+const checkPassword = (userId, password) => {
+  return new Promise(async (rs, rj) => {
+    try {
+
+      const user = await User.findById(userId);
+      if (!user) {
+        rj({
+          status: "ERR",
+          message: "Không tìm thấy tài khoản!",
+        })
+      }
+      const checkPassword = bcrypt.compareSync(password, user.password);
+      // console.log("check-pass: ", checkPassword);
+      if (!checkPassword) {
+        rj({
+          status: "ERR",
+          message: "Mật khẩu không đúng",
+        })
+      } else {
+        rs({
+          status: "OK",
+          message: "Mật khẩu chính xác"
+        })
+      }
+    } catch (err) {
+      rj(err);
+    }
+  })
+}
+
 const resetPassword = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { key, token, password, confirm_password } = data;
-      jwt.verify(token, process.env.ACCESS_TOKEN, async (err, payload) => {
-        if (err) {
-          return resolve({
-            status: "ERR",
-            message: "Yêu cầu đã hết hạn!",
-          });
-        }
-        const user = await User.findOne({ email: payload.email });
-        if (!user) {
-          return resolve({
-            status: "ERR",
-            message: "Email không tồn tại!",
-          });
-        }
-        if (Number(key) !== payload.key) {
-          return resolve({
-            status: "ERR",
-            message: "OTP không chính xác!",
-          });
-        }
-        if (password !== confirm_password) {
-          return resolve({
-            status: "ERR",
-            message: "Mật khẩu nhập lại không khớp!",
-          });
-        }
-        const hashPassword = bcrypt.hashSync(password, 12);
-        await User.findOneAndUpdate(
-          { email: payload.email },
-          {
-            password: hashPassword,
-          },
-          { new: true }
-        );
-        return resolve({
-          status: "OK",
-          message: "Đặt lại mật khẩu thành công!",
+      const { userId, password, confirmPassword } = data;
+      if (password !== confirmPassword) {
+        return reject({
+          status: "ERR",
+          message: "Mật khẩu nhập lại không khớp!",
         });
+      }
+      const hashPassword = bcrypt.hashSync(password, 12);
+      await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          password: hashPassword,
+        },
+        { new: true }
+      );
+      return resolve({
+        status: "OK",
+        message: "Đặt lại mật khẩu thành công!",
       });
     } catch (error) {
       reject(error);
@@ -755,4 +796,6 @@ export {
   forgotPassword,
   resetPassword,
   sendMessage,
+  updateShippingAddress,
+  checkPassword
 };
