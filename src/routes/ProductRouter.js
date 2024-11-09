@@ -9,7 +9,6 @@ import * as ProductController from "~/controllers/ProductController";
 import { uploadProductCloud } from "~/middlewares/uploadFileMiddleware";
 import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
-
 router.post(
   "/",
   //authAdminMiddleware,
@@ -36,6 +35,5 @@ router.delete(
   authAdminMiddleware,
   ProductController.deleteProduct
 );
-
 
 export default router;
