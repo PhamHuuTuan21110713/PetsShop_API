@@ -122,7 +122,7 @@ const getCategoryById = (id, condition, paging) => {
                                                 ]
                                             }
                                         }
-                                    },
+                                    }
                                 ],
                                 as: 'products.products'
                             }
@@ -136,18 +136,25 @@ const getCategoryById = (id, condition, paging) => {
                             }
                         },
                         {
-                            $replaceRoot: { 
-                                newRoot: { 
+                            $replaceRoot: {
+                                newRoot: {
                                     $mergeObjects: [
-                                        "$allFields", 
+                                        "$allFields",
                                         { products: { $reduce: { input: "$products", initialValue: [], in: { $concatArrays: ["$$value", "$$this"] } } } }
-                                    ] 
-                                } 
+                                    ]
+                                }
                             }
                         },
                         {
                             $addFields: {
-                                products: { $slice: ["$products", skip, limit] }
+                                total: { $size: "$products" }  // Tính tổng số lượng sản phẩm trong mảng products
+                            }
+                        },
+                        {
+                            $addFields: {
+                                products: { $slice: ["$products", skip, limit] },
+                                page: { $literal: page },  // Trả về page
+                                limit: { $literal: limit }  // Trả về limit
                             }
                         },
                         {
@@ -190,6 +197,11 @@ const getCategoryById = (id, condition, paging) => {
                                         }
                                     }
                                 ]
+                            }
+                        },
+                        {
+                            $addFields: {
+                                total: { $size: "$products" }  // Tính tổng số lượng sản phẩm trong mảng products
                             }
                         },
                         {
