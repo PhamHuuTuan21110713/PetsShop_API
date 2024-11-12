@@ -54,12 +54,15 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
     const maxStar = parseInt(condition.maxStar);
     const minPrice = parseInt(condition.minPrice);
     const maxPrice = parseInt(condition.maxPrice);
+    const isOnlyPromotion = condition.onlyPromotion;
     const page = parseInt(paging.page);
     const limit = parseInt(paging.limit);
     const skip = (page - 1) * limit;
     const idobj = new mongoose.Types.ObjectId(id);
-
-    // console.log("id: ", id)
+    const matchStage = isOnlyPromotion === true
+        ? { "products.promotions.0": { $exists: true } }  // Lọc sản phẩm có khuyến mãi
+        : {}; 
+    console.log("match: ", matchStage); 
     return new Promise(async (rs, rj) => {
         try {
             const cate = await Category.findById(id);
@@ -382,6 +385,7 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                 as: "products.promotions"
                             }
                         },
+                        
                         {
                             $group: {
                                 _id: "$_id",  // Nhóm theo _id của Category
@@ -397,6 +401,11 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                         { products: { $concatArrays: ["$products", "$products.products"] } }  // Kết hợp các mảng products
                                     ]
                                 }
+                            }
+                        },
+                        {
+                            $addFields: {
+                                products: { $filter: { input: "$products", cond: isOnlyPromotion ? { $gt: [{ $size: "$$this.promotions" }, 0] } : true } }
                             }
                         },
                         {
@@ -469,11 +478,28 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                         {
                             $lookup: {
                                 from: 'promotions',
-                                localField: 'products._id',
-                                foreignField: "applicableProducts",
+                                // localField: 'products._id',
+                                // foreignField: "applicableProducts",
+                                let: { productId: "$products._id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $in: ["$$productId", "$applicableProducts"] }, // Kiểm tra xem productId có trong applicableProducts
+                                                    { $lte: ["$startDate", new Date()] }, // startDate <= ngày hiện tại
+                                                    { $gte: ["$endDate", new Date()] } // endDate >= ngày hiện tại
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
                                 as: "products.promotions"
                             }
                         },
+                        // {
+                        //     $match: matchStage
+                        // },
                         {
                             $group: {
                                 _id: "$_id",  // Nhóm theo _id của Category
@@ -489,6 +515,11 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                         { products: { $concatArrays: ["$products", "$products.products"] } }  // Kết hợp các mảng products
                                     ]
                                 }
+                            }
+                        },
+                        {
+                            $addFields: {
+                                products: { $filter: { input: "$products", cond: isOnlyPromotion ? { $gt: [{ $size: "$$this.promotions" }, 0] } : true } }
                             }
                         },
                         {

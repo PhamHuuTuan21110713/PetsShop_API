@@ -28,7 +28,7 @@ const getCategoryById = async (req, res) => {
     console.log("limit: ", limit)
     console.log("filter: ", filters);
     console.log("sort: ", sort)
-    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice =Number.MAX_SAFE_INTEGER, isPromotion = false, isVoucher = false } = filters;
+    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice =Number.MAX_SAFE_INTEGER, onlyPromotion = false} = filters;
     let sorting = {sold: -1}
     if(sort === "sold") {
         sorting = {sold: -1}
@@ -39,9 +39,9 @@ const getCategoryById = async (req, res) => {
     } else if (sort === "price-down") {
         sorting = {price: -1}
     }
-    console.log("sorting: ", sorting)
+    console.log("promotion: ", onlyPromotion)
     try {
-        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice }, { page, limit }, sorting)
+        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice,onlyPromotion: JSON.parse(onlyPromotion) }, { page, limit }, sorting)
         // console.log("page: ",page)
         // console.log("limit: ",limit)
         // console.log("filters: ",filters)
