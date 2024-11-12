@@ -27,7 +27,7 @@ router.route('/:id')
 router.route('/shipping-address/:id')
   .patch(authUserMiddleware, UserController.updateShippingAddress)
 // /router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
-// router.post("/login", UserController.loginUser);
+//router.post("/login", UserController.loginUser);
 router.post("/check-password/:id",authUserMiddleware, UserController.checkPassword)
 router.patch("/reset-password/:id",authUserMiddleware, UserController.resetPassword);
 
