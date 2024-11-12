@@ -1,6 +1,5 @@
 // const mongoose = require("mongoose");
 import mongoose from "mongoose";
-import { slugify } from "~/utils/formatters";
 const categorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
