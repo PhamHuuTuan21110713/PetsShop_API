@@ -15,20 +15,33 @@ const createNewCategory = async (req, res) => {
         const response = await CategoryService.createNewCategory(data);
         return res.status(201).json(response);
     } catch (err) {
-        return res.stauts(404)
+        
+        return res.stauts(404).json(err)
     }
 }
 
 const getCategoryById = async (req, res) => {
     const id = req.params.id;
     // console.log("id: ", typeof id)
-    const { page = 1, limit = 3, ...filters } = req.query;
-    // console.log("page: ", page);
-    // console.log("limit: ", limit)
-    // console.log("filter: ", filters);
-    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice =Number.MAX_SAFE_INTEGER, isPromotion = false, isVoucher = false } = filters;
+    const { page = 1, limit = 3, sort, ...filters } = req.query;
+    console.log("page: ", page);
+    console.log("limit: ", limit)
+    console.log("filter: ", filters);
+    console.log("sort: ", sort)
+    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice =Number.MAX_SAFE_INTEGER, onlyPromotion = false} = filters;
+    let sorting = {sold: -1}
+    if(sort === "sold") {
+        sorting = {sold: -1}
+    } else if (sort === "date") {
+        sorting = {updatedAt: -1}
+    } else if (sort === "price-up") {
+        sorting = {price: 1}
+    } else if (sort === "price-down") {
+        sorting = {price: -1}
+    }
+    console.log("promotion: ", onlyPromotion)
     try {
-        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice }, { page, limit })
+        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice,onlyPromotion: JSON.parse(onlyPromotion) }, { page, limit }, sorting)
         // console.log("page: ",page)
         // console.log("limit: ",limit)
         // console.log("filters: ",filters)
