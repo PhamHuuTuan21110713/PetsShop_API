@@ -9,6 +9,7 @@ import PromotionRouter from './PromotionRouter.js';
 import ServiceRouter from './ServiceRouter.js';
 import ShopInformationRouter from './ShopInformationRouter.js';
 import BookingRouter from './BookingRouter.js';
+import EmailRouter from './EmailRouter.js';
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/users", UserRouter);
@@ -20,6 +21,7 @@ const routes = (app) => {
   app.use("/api/services", ServiceRouter);
   app.use("/api/shop", ShopInformationRouter);
   app.use("/api/bookings",BookingRouter );
+  app.use("/api", EmailRouter);
 };
 
 export default routes;

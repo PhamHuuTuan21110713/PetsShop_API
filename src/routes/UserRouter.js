@@ -26,11 +26,9 @@ router.route('/:id')
 
 router.route('/shipping-address/:id')
   .patch(authUserMiddleware, UserController.updateShippingAddress)
-// /router.post("/register",uploadUserCloud.single("avatar"),UserController.createUser);
-// router.post("/login", UserController.loginUser);
+
 router.post("/check-password/:id",authUserMiddleware, UserController.checkPassword)
 router.patch("/reset-password/:id",authUserMiddleware, UserController.resetPassword);
-
 
 router.post("/forgot-password", UserController.forgotPassword);
 router.post("/send-message", UserController.sendMessage);
