@@ -8,7 +8,8 @@ const getAllCategories = () => {
                 //Tìm các category cha (parentCategoryId = "none")
                 {
                     $match: {
-                        parentCategoryId: 'none'
+                        parentCategoryId: 'none',
+                        state: 1 //new
                     }
                 },
                 {
@@ -23,6 +24,18 @@ const getAllCategories = () => {
                         localField: 'idAsString', // Trường _id của danh mục cha
                         foreignField: 'parentCategoryId', // Trường parentCategoryId của danh mục con
                         as: 'subCategory' // Trường mới chứa danh sách category con
+                    }
+                },
+                // Lọc subCategory để chỉ lấy những danh mục con có state = 1
+                {
+                    $addFields: {
+                        subCategory: {
+                            $filter: {
+                                input: "$subCategory", // Mảng cần lọc
+                                as: "sub", // Tên biến đại diện cho từng phần tử
+                                cond: { $eq: ["$$sub.state", 1] } // Điều kiện lọc (state = 1)
+                            }
+                        }
                     }
                 },
                 // - Loại bỏ trường parentCategoryId trong kết quả
@@ -61,245 +74,14 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
     const idobj = new mongoose.Types.ObjectId(id);
     const matchStage = isOnlyPromotion === true
         ? { "products.promotions.0": { $exists: true } }  // Lọc sản phẩm có khuyến mãi
-        : {}; 
-    console.log("match: ", matchStage); 
+        : {};
+    console.log("match: ", matchStage);
     return new Promise(async (rs, rj) => {
         try {
             const cate = await Category.findById(id);
             if (cate) {
                 let result = null;
                 if (cate.parentCategoryId === "none") {
-
-                    // Truy vấn ko có khuyến mãi
-                    // result = await Category.aggregate([
-                    //     {
-                    //         $match: {
-                    //             _id: idobj,
-                    //             state: 1
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             idAsString: { $toString: "$_id" }
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'categories',
-                    //             localField: 'idAsString',
-                    //             foreignField: 'parentCategoryId',
-                    //             as: 'subCategory'
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-
-                    //             products: {
-                    //                 $cond: {
-                    //                     if: { $or: [{ $eq: ["$subCategory", null] }, { $eq: ["$subCategory", undefined] }] },
-                    //                     then: [],
-                    //                     else: "$subCategory"
-                    //                 }
-                    //             }
-                    //         }
-                    //     },
-                    //     {
-                    //         $unwind: '$products'
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             stringSubCategoryId: { $toString: "$products._id" },// Tạo trường mới addString chứa giá trị của _id dưới dạng string
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'products',
-                    //             let: { subCatId: "$stringSubCategoryId" },
-                    //             pipeline: [
-                    //                 {
-                    //                     $match: {
-                    //                         $expr: {
-                    //                             $and: [
-                    //                                 { $eq: ["$state", true] },
-                    //                                 { $eq: ["$categoryId", "$$subCatId"] },
-                    //                                 { $gte: ["$price", minPrice] },
-                    //                                 { $lte: ["$price", maxPrice] },
-                    //                                 { $gte: ["$rating", minStar] },
-                    //                                 { $lte: ["$rating", maxStar] }
-                    //                             ]
-                    //                         }
-                    //                     }
-                    //                 },
-                    //             ],
-                    //             as: 'products.products'
-                    //         }
-                    //     },
-                    //     {
-                    //         $group: {
-                    //             _id: '$_id',
-                    //             allFields: { $first: '$$ROOT' },
-                    //             products: { $push: '$products.products' },
-
-                    //         }
-                    //     },
-                    //     {
-                    //         $replaceRoot: {
-                    //             newRoot: {
-                    //                 $mergeObjects: [
-                    //                     "$allFields",
-                    //                     { products: { $reduce: { input: "$products", initialValue: [], in: { $concatArrays: ["$$value", "$$this"] } } } }
-                    //                 ]
-                    //             }
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             // Sắp xếp mảng products theo trường sold giảm dần
-                    //             products: { $sortArray: { input: "$products", sortBy: sort } }
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             total: { $size: "$products" }  // Tính tổng số lượng sản phẩm trong mảng products
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             products: { $slice: ["$products", skip, limit] },
-                    //             page: { $literal: page },  // Trả về page
-                    //             limit: { $literal: limit }  // Trả về limit
-                    //         }
-                    //     },
-                    //     {
-                    //         $project: {
-                    //             stringSubCategoryId: 0,
-                    //             subCategory: 0,
-                    //             idAsString: 0
-                    //         }
-                    //     }
-                    // ]);
-
-                    // truy vấn có khuyến mãi chưa tối ưu
-                    // result = await Category.aggregate([
-                    //     {
-                    //         $match: {
-                    //             _id: idobj,
-                    //             state: 1
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             idAsString: { $toString: "$_id" }
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'categories',
-                    //             localField: 'idAsString',
-                    //             foreignField: 'parentCategoryId',
-                    //             as: 'subCategory'
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-
-                    //             products: {
-                    //                 $cond: {
-                    //                     if: { $or: [{ $eq: ["$subCategory", null] }, { $eq: ["$subCategory", undefined] }] },
-                    //                     then: [],
-                    //                     else: "$subCategory"
-                    //                 }
-                    //             }
-                    //         }
-                    //     },
-                    //     {
-                    //         $unwind: '$products'
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             stringSubCategoryId: { $toString: "$products._id" },
-                    //         }
-                    //     },
-                    //     {
-                    //         $lookup: {
-                    //             from: 'products',
-                    //             let: { subCatId: "$stringSubCategoryId" },
-                    //             pipeline: [
-                    //                 {
-                    //                     $match: {
-                    //                         $expr: {
-                    //                             $and: [
-                    //                                 { $eq: ["$state", true] },
-                    //                                 { $eq: ["$categoryId", "$$subCatId"] },
-                    //                                 { $gte: ["$price", minPrice] },
-                    //                                 { $lte: ["$price", maxPrice] },
-                    //                                 { $gte: ["$rating", minStar] },
-                    //                                 { $lte: ["$rating", maxStar] }
-                    //                             ]
-                    //                         }
-                    //                     }
-                    //                 },
-                    //             ],
-                    //             as: 'products.products'
-                    //         }
-                    //     },
-                    //     {
-                    //         $unwind: "$products.products"
-                    //     },
-                    //     // Thêm bước $lookup để lấy thông tin khuyến mãi từ bảng Promotions
-                    //     {
-                    //         $lookup: {
-                    //             from: 'promotions',
-                    //             localField: 'products.products._id', // Lấy productId từ bảng products
-                    //             foreignField: 'applicableProducts', // Lọc các promotion có productId trong applicableProducts
-                    //             as: 'products.products.promotions'
-                    //         }
-                    //     },
-                    //     {
-                    //         $group: {
-                    //             _id: '$_id',
-                    //             allFields: { $first: '$$ROOT' },
-                    //             products: { $push: '$products.products' },
-
-                    //         }
-                    //     },
-                    //     {
-                    //         $replaceRoot: {
-                    //             newRoot: {
-                    //                 $mergeObjects: [
-                    //                     "$allFields",
-                    //                     { products: { $concatArrays: ["$products", "$products.products"] } }
-                    //                 ]
-                    //             }
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             // Sắp xếp mảng products theo trường sold giảm dần
-                    //             products: { $sortArray: { input: "$products", sortBy: sort } }
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             total: { $size: "$products" }  // Tính tổng số lượng sản phẩm trong mảng products
-                    //         }
-                    //     },
-                    //     {
-                    //         $addFields: {
-                    //             products: { $slice: ["$products", skip, limit] },
-                    //             page: { $literal: page },  // Trả về page
-                    //             limit: { $literal: limit }  // Trả về limit
-                    //         }
-                    //     },
-                    //     {
-                    //         $project: {
-                    //             stringSubCategoryId: 0,
-                    //             subCategory: 0,
-                    //             idAsString: 0
-                    //         }
-                    //     }
-                    // ]);
-
                     // tối ưu truy vấn có khuyến mãi
                     result = await Category.aggregate([
                         {
@@ -319,6 +101,18 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                 localField: 'idAsString',
                                 foreignField: 'parentCategoryId',
                                 as: 'subCategory'
+                            }
+                        },
+                        // Lọc subCategory để chỉ lấy những danh mục con có state = 1
+                        {
+                            $addFields: {
+                                subCategory: {
+                                    $filter: {
+                                        input: "$subCategory", // Mảng cần lọc
+                                        as: "sub", // Tên biến đại diện cho từng phần tử
+                                        cond: { $eq: ["$$sub.state", 1] } // Điều kiện lọc (state = 1)
+                                    }
+                                }
                             }
                         },
                         {
@@ -385,7 +179,7 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                 as: "products.promotions"
                             }
                         },
-                        
+
                         {
                             $group: {
                                 _id: "$_id",  // Nhóm theo _id của Category
@@ -437,7 +231,8 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                     result = await Category.aggregate([
                         {
                             $match: {
-                                _id: idobj
+                                _id: idobj,
+                                state: 1
                             }
                         },
                         {
