@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema(
     sold: { type: Number, required: false, default: 0 },
     view: { type: Number, required: false, default: 0 },
     rating: { type: Number, required: false, default: 0 },
-    size: { type: Array, required: false, default: ["S", "M", "L", "XL"] },
+    //size: { type: Array, required: false, default: ["S", "M", "L", "XL"] },
     categoryId: {type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true},
     img: {
       type: String,

@@ -159,8 +159,8 @@ const addToCart = async (req, res) => {
     const userId = req.params.id;
     const data = req.body;
 
-    const { productId, name, img, size, quantity, price } = data;
-    if (!productId || !name || !img || !size || !quantity || !price) {
+    const { productId, name, img, quantity, price } = data;
+    if (!productId || !name || !img || !quantity || !price) {
       return res.status(200).json({
         status: "ERR",
         message: "Không có dữ liệu sản phẩm!",
@@ -176,31 +176,82 @@ const addToCart = async (req, res) => {
   }
 };
 
+const updateCart = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body; // Thông tin giỏ hàng gửi từ client
+  const { productId, quantity } = data;
+
+  // Kiểm tra dữ liệu đầu vào
+  if (!productId || !quantity) {
+    return res.status(400).json({
+      status: "ERR",
+      message: "Thiếu thông tin sản phẩm hoặc số lượng!",
+    });
+  }
+
+  try {
+    // Gọi service để cập nhật giỏ hàng
+    const response = await UserService.updateCart(id, data);
+
+    // Trả về giỏ hàng đã được cập nhật
+    return res.status(200).json({
+      status: "OK",
+      message: "Cập nhật giỏ hàng thành công!",
+      data: response,  // response sẽ là giỏ hàng đã cập nhật
+    });
+  } catch (error) {
+    console.error("Error updating cart: ", error);
+    return res.status(500).json({
+      status: "ERR",
+      message: "Không thể cập nhật giỏ hàng!",
+      error: error.message || error,
+    });
+  }
+};
+
 const removeFromCart = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const { productId, size } = req.body;
-    const response = await UserService.removeFromCart(userId, productId, size);
-    return res.status(200).json(response);
+      const userId = req.params.id;
+      const { productId } = req.body;
+      console.log("Received userId:", userId, "and productId:", productId);  // In ra để kiểm tra
+      if (!productId) {
+          return res.status(400).json({ message: "Product ID is required" });
+      }
+      const response = await UserService.removeFromCart(userId, productId);
+      return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+      console.error("Error removing from cart:", error);  // In ra để kiểm tra lỗi
+      return res.status(400).json({
+          message: error.message || "An error occurred while removing the product from the cart",
+      });
   }
 };
 
 const payment = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const data = req.body;
-    const response = await UserService.payment(userId, data);
-    return res.status(200).json(response);
+    const { amount, orderInfo, partnerCode, secretKey, redirectUrl, ipnUrl } = req.body;
+
+    // Call the service that handles MoMo payment creation
+    const paymentResponse = await UserService.payment(
+      amount,
+      orderInfo,
+      partnerCode,
+      secretKey,
+      redirectUrl,
+      ipnUrl
+    );
+
+    // Return the payment response as JSON
+    return res.status(200).json(paymentResponse);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
+    // Handle errors and return appropriate response
+    return res.status(500).json({
+      statusCode: 500,
+      message: error.message || 'An error occurred while initiating the payment.',
     });
   }
 };
+
 
 const clearCart = async (req, res) => {
   try {
@@ -308,6 +359,7 @@ export {
   updateUser,
   deleteUser,
   addToCart,
+  updateCart,
   removeFromCart,
   payment,
   clearCart,

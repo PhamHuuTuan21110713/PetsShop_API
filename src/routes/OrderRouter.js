@@ -9,7 +9,9 @@ const {
   authUserMiddleware,
 } = require("../middlewares/authMiddleware");
 
-router.post("/create", authUserMiddleware, OrderController.createOrder);
+router.post("/create",
+  //authUserMiddleware,
+  OrderController.createOrder);
 router.get(
   "/get-by-user/:id",
   authUserMiddleware,

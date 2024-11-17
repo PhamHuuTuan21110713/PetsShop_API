@@ -15,8 +15,8 @@ const createProduct = (data, imageFile) => {
       sold,
       view,
       rating,
-      size,
-      category
+      //size,
+      categoryId
     } = data;
     try {
       const checkedProduct = await Product.findOne({ name });
@@ -31,7 +31,7 @@ const createProduct = (data, imageFile) => {
       } else {
         const img = imageFile?.path;
         const imgPath = imageFile?.filename;
-        const newSize = size || ["S", "M", "L", "XL"];
+        //const newSize = size || ["S", "M", "L", "XL"];
         const newProduct = await Product.create({
           name,
           desc,
@@ -44,8 +44,8 @@ const createProduct = (data, imageFile) => {
           rating,
           img,
           imgPath,
-          size: newSize,
-          category
+          //size: newSize,
+          categoryId
         });
         if (newProduct) {
           resolve({
