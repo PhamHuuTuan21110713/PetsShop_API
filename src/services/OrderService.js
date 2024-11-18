@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 
 const createOrder = (data) => {
   return new Promise(async (resolve, reject) => {
-    const { customerId, products, totalAmount, grandTotal, shippingFee, note, paymentMethod, address } = data;
+    const { customerId, products, totalAmount, shippingFee, note, paymentMethod, address } = data;
 
     try {
       // Kiểm tra người dùng
@@ -63,11 +63,9 @@ const createOrder = (data) => {
         address,
         orderDate,
         deliveryDate,
-        isCompleted: false,
         products,
-        price: totalAmount,
+        totalPrice: totalAmount,
         shippingFee,
-        totalAmount: grandTotal,
         note,
         paymentMethod,
       });
