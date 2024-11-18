@@ -1,17 +1,17 @@
 import Review from '../models/ReviewModel.js';
 import Product from '../models/ProductModel.js';
-//import Service from '../models/Service.js';
+import Service from '../models/ServiceModel.js';
 
 const createReview = async (newData) => {
   let entity;
-
+  // console.log("newData: ", newData)
   if (newData.type === 'product') {
     entity = await Product.findById(newData.entityId);
   } 
-  // else if (type === 'service') {
-  //   entity = await Service.findById(entityId);
-  // }
-
+  else if (newData.type === 'service') {
+    entity = await Service.findById(newData.entityId);
+  }
+ 
   if (!entity) {
     throw new Error('Sản phẩm hoặc dịch vụ không tồn tại');
   }

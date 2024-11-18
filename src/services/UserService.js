@@ -46,6 +46,8 @@ const createUser = (data) => {
           address,
           shippingAddress: [
             {
+              recipientName: name,
+              recipientPhone: phone,
               address,
               isDefault: true,
             }

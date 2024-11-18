@@ -1,9 +1,31 @@
 import Promotion from "~/models/Promotion";
 import mongoose from "mongoose";
-const getAllPromotions = (condition = {}) => {
+const getAllPromotions = (outdated = "none", condition = {}) => {
+
     return new Promise(async (rs, rj) => {
         try {
-            const promotions = await Promotion.find({ ...condition, state: true });
+            let promotions = null;
+            const today = new Date();
+            if (outdated === "true") {
+                promotions = await Promotion.find({
+                    $or: [
+                        { startDate: { $gt: today } }, 
+                        { endDate: { $lt: today } } 
+                    ], 
+                    ...condition, 
+                    state: true
+                });
+            } else if (outdated === "false") {
+                promotions = await Promotion.find({
+                    startDate: { $lte: today },
+                    endDate: { $gte: today },
+                    ...condition,
+                    state: true
+                });
+            } else {
+                console.log("chay vao day")
+                promotions = await Promotion.find({ ...condition, state: true });
+            }
             if (promotions) {
                 rs({
                     status: "OK",
@@ -84,7 +106,7 @@ const getPromotionById = (id) => {
                 rs({
                     status: "OK",
                     message: "Lấy thông tin chương trình thành công",
-                    data: data
+                    data: data[0]
                 })
             }
         } catch (err) {
