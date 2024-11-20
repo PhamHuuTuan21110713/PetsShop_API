@@ -26,7 +26,6 @@ router.route('/:id')
 
 router.route('/shipping-address/:id')
   .patch(authUserMiddleware, UserController.updateShippingAddress)
-
 router.post("/check-password/:id",authUserMiddleware, UserController.checkPassword)
 router.patch("/reset-password/:id",authUserMiddleware, UserController.resetPassword);
 
@@ -34,6 +33,7 @@ router.post("/forgot-password", UserController.forgotPassword);
 router.post("/send-message", UserController.sendMessage);
 
 router.patch("/add-to-cart/:id", authUserMiddleware, UserController.addToCart);
+router.patch("/update-cart/:id", authUserMiddleware, UserController.updateCart);
 router.patch("/remove-from-cart/:id", authUserMiddleware, UserController.removeFromCart);
 router.patch("/clear-cart/:id", authUserMiddleware, UserController.clearCart);
 router.post("/payment/:id", authUserMiddleware, UserController.payment);

@@ -18,7 +18,6 @@ const authAdminMiddleware = (req, res, next) => {
     if (err) {
       // console.log("loi1", err);
       return res.status(401).json({
-       
         status: "ERR",
         message: "THE AUTHORIZATION",
       });

@@ -2,8 +2,8 @@
 import * as ProductService from "~/services/ProductService";
 const createProduct = async (req, res) => {
   try {
-    const { name, desc, type, price } = req.body;
-    if (!name || !desc || !type || !price) {
+    const { name, desc, type, price, categoryId } = req.body;
+    if (!name || !desc || !type || !price || !categoryId) {
       return res.status(200).json({
         status: "ERR",
         message: "Các trường không được để trống!",

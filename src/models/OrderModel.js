@@ -10,22 +10,10 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  isCompleted: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  
   products: [
     {
       productId: {
-        type: String,
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true,
-      },
-      size: {
         type: String,
         required: true,
       },
@@ -36,22 +24,18 @@ const orderSchema = new mongoose.Schema({
       price: {
         type: Number,
         required: true,
-      },
-      img: {
-        type: String,
-        required: true,
-      },
+      }
     },
   ],
-  price: {
-    type: Number,
-    required: true,
+  status: {
+    type: String, required: true, enum: ["dxl", "dg", "tc", "hbs", "hbb"], 
+    default: "dxl"
   },
   shippingFee: {
     type: Number,
     required: true,
   },
-  totalAmount: {
+  totalPrice: {
     type: Number,
     required: false,
   },
@@ -64,6 +48,7 @@ const orderSchema = new mongoose.Schema({
     required: false,
     default: "COD",
   },
+  state: { type: Boolean, required: false, default: true }
 });
 
 const Order = mongoose.model("Order", orderSchema);

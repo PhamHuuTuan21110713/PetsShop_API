@@ -1,13 +1,17 @@
-// const OrderService = require("../services/OrderService");
+
 import * as OrderService from "~/services/OrderService";
 
 const createOrder = async (req, res) => {
+  console.log("controller", typeof req.body.products);
+  
   try {
     const response = await OrderService.createOrder(req.body);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(404).json({
-      message: error,
+    console.error("Error creating order:", error); // Log lỗi chi tiết
+    return res.status(500).json({
+      message: "Đã có lỗi xảy ra khi tạo đơn hàng",
+      error: error.message, // Trả về thông tin lỗi chi tiết
     });
   }
 };

@@ -1,6 +1,8 @@
 import Category from "~/models/CategoryModel"
 import { slugify } from "~/utils/formatters";
 import mongoose from "mongoose";
+import Product from "~/models/ProductModel";
+import Promotion from "~/models/Promotion";
 const getAllCategories = () => {
     return new Promise(async (rs, rj) => {
         try {
@@ -60,6 +62,38 @@ const getAllCategories = () => {
         }
 
     })
+}
+
+// Cho kiểm thử
+const generateParentCategoryAPI = async (parCategory) => {
+
+    try {
+        const copy =  parCategory.toObject();
+        console.log("coppy type: ", typeof copy)
+        const products = [];
+        const subCategories = await Category.find({ parentCategoryId: parCategory._id });
+        if (subCategories.length > 0) {
+            for (let sub of subCategories) {
+                const id = sub._id.toString();;
+                const prods = await Product.find({ categoryId: id });
+
+                for (let prod of prods) {
+                    const prodId = new mongoose.Types.ObjectId(prod._id);
+                    const promotions = await Promotion.find({ applicableProducts: { $in: [prodId] } });
+                    prod.promotion = promotions[0];
+                    products.push(prod);
+
+                }
+
+            }
+        }
+        copy.products = products
+        return copy;
+    } catch (err) {
+        console.log("err", err)
+        return err;
+    }
+
 }
 
 const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
@@ -342,10 +376,12 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                         }
                     ])
                 }
+                // const res = await generateParentCategoryAPI(cate)
                 rs({
                     stauts: "OK",
                     message: "Lấy danh mục thành công",
                     data: result[0]
+                    // data: res
                 })
             }
 
