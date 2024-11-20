@@ -11,7 +11,7 @@ import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from "cloudinary";
 import JWTService from './JWTService';
 import nodemailer from 'nodemailer';
-import jwt from 'jsonwebtoken';
+
 
 const createUser = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -194,10 +194,10 @@ const getUserById = (userId) => {
   });
 };
 
-const updateUser = (userId, data, imageFile) => {
+const updateUser = (userId, data, imageFile, role) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { name, email, phone, gender, address } = data;
+      const { name, email, phone, gender, address, state = 1 } = data;
       const checkUserByPhone = await User.findOne({ phone });
       if (checkUserByPhone && checkUserByPhone.phone !== phone) {
         reject({
@@ -209,7 +209,7 @@ const updateUser = (userId, data, imageFile) => {
       if (!user) {
         if (imageFile) {
           cloudinary.uploader.destroy(imageFile.filename);
-          console.log("deleting prev avatar when error")
+          console.log("deleting prev avatar when can't find user")
         }
         reject({
           status: "ERR",
@@ -235,32 +235,46 @@ const updateUser = (userId, data, imageFile) => {
           phone,
           avatar,
           gender,
-          address
+          address,
+          state: parseInt(state)
         },
         { new: true, runValidators: true }
       );
-      const access_token = await JWTService.generateAccessToken({
-        id: updatedUser._id,
-        role: updatedUser.role,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-      });
-      const refresh_token = await JWTService.generateRefreshToken({
-        id: updatedUser._id,
-        role: updatedUser.role,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-      });
-      resolve({
-        status: "OK",
-        message: "Cập nhật tài khoản thành công!",
-        data: {
-          access_token,
-          refresh_token,
-          user: updatedUser
-        },
-      });
+      if (role === "admin") {
+        resolve({
+          status: "OK",
+          message: "Cập nhật tài khoản thành công!",
+          data: updatedUser
+        })
+      } else if (role === "user") {
+
+        const access_token = await JWTService.generateAccessToken({
+          id: updatedUser._id,
+          role: updatedUser.role,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        });
+        const refresh_token = await JWTService.generateRefreshToken({
+          id: updatedUser._id,
+          role: updatedUser.role,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        });
+        resolve({
+          status: "OK",
+          message: "Cập nhật tài khoản thành công!",
+          data: {
+            access_token,
+            refresh_token,
+            user: updatedUser
+          },
+        });
+      }
     } catch (error) {
+      if (imageFile) {
+        cloudinary.uploader.destroy(imageFile.filename);
+        console.log("deleting prev avatar when error")
+      }
       reject(error);
     }
   });
@@ -516,7 +530,7 @@ const payment = (userId, data) => {
         const secretKey = 'MOMO_SECRET_KEY'; // Replace with your actual MoMo secret key
         const redirectUrl = 'YOUR_REDIRECT_URL'; // Replace with your actual redirect URL after payment
         const ipnUrl = 'YOUR_IPN_URL'; // Replace with your actual IPN (Instant Payment Notification) URL
-        
+
         const orderInfo = `Đơn hàng từ ${name}, điện thoại: ${phone}, tổng giá trị: ${totalAmount}`;
         const amount = totalAmount; // The total amount to pay
 

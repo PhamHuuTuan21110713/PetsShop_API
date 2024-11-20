@@ -3,22 +3,20 @@ import Product from '../models/ProductModel.js';
 import Order from '../models/OrderModel.js';
 //import Service from '../models/Service.js';
 
+
 const createReview = async (newData) => {
   const { userId, type, entityId } = newData;
 
   console.log("Thông tin nhận được: ", userId, type, entityId);
-  
-
   let entity;
 
   // Kiểm tra sản phẩm hoặc dịch vụ (nếu có)
   if (type === 'product') {
     entity = await Product.findById(entityId); // entityId là productId ở đây
   } 
-  // else if (type === 'service') {
-  //   entity = await Service.findById(entityId); // Thêm logic cho dịch vụ nếu cần
-  // }
-
+  else if (type === 'service') {
+    entity = await Service.findById(entityId); // Thêm logic cho dịch vụ nếu cần
+  }
   if (!entity) {
     return { 
       status: "ERROR", 
