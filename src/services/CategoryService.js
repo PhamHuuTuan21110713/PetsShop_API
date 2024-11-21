@@ -65,36 +65,36 @@ const getAllCategories = () => {
 }
 
 // Cho kiểm thử
-const generateParentCategoryAPI = async (parCategory) => {
+// const generateParentCategoryAPI = async (parCategory) => {
 
-    try {
-        const copy =  parCategory.toObject();
-        console.log("coppy type: ", typeof copy)
-        const products = [];
-        const subCategories = await Category.find({ parentCategoryId: parCategory._id });
-        if (subCategories.length > 0) {
-            for (let sub of subCategories) {
-                const id = sub._id.toString();;
-                const prods = await Product.find({ categoryId: id });
+//     try {
+//         const copy =  parCategory.toObject();
+//         console.log("coppy type: ", typeof copy)
+//         const products = [];
+//         const subCategories = await Category.find({ parentCategoryId: parCategory._id });
+//         if (subCategories.length > 0) {
+//             for (let sub of subCategories) {
+//                 const id = sub._id.toString();;
+//                 const prods = await Product.find({ categoryId: id });
 
-                for (let prod of prods) {
-                    const prodId = new mongoose.Types.ObjectId(prod._id);
-                    const promotions = await Promotion.find({ applicableProducts: { $in: [prodId] } });
-                    prod.promotion = promotions[0];
-                    products.push(prod);
+//                 for (let prod of prods) {
+//                     const prodId = new mongoose.Types.ObjectId(prod._id);
+//                     const promotions = await Promotion.find({ applicableProducts: { $in: [prodId] } });
+//                     prod.promotion = promotions[0];
+//                     products.push(prod);
 
-                }
+//                 }
 
-            }
-        }
-        copy.products = products
-        return copy;
-    } catch (err) {
-        console.log("err", err)
-        return err;
-    }
+//             }
+//         }
+//         copy.products = products
+//         return copy;
+//     } catch (err) {
+//         console.log("err", err)
+//         return err;
+//     }
 
-}
+// }
 
 const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
     const minStar = parseInt(condition.minStar);
