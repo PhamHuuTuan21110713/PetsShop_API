@@ -8,6 +8,7 @@ import { v2 as cloudinary } from "cloudinary";
 import useragent from "useragent";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import User from "~/models/UserModel";
 dotenv.config();
 const createUser = async (req, res) => {
   try {
@@ -56,6 +57,17 @@ const createUser = async (req, res) => {
     });
   }
 };
+
+const createMany = async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("body: ", data)
+    const response = await UserService.createMany(data);
+    return res.status(201).json(response);
+  }catch(err) {
+    return res.status(404).json(err);
+  }
+}
 
 const loginUser = async (req, res) => {
   try {
@@ -379,6 +391,7 @@ const logout = async (req, res) => {
 
 export {
   createUser,
+  createMany,
   loginUser,
   refreshToken,
   getAllUser,
