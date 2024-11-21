@@ -8,6 +8,7 @@ import { v2 as cloudinary } from "cloudinary";
 import useragent from "useragent";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import User from "~/models/UserModel";
 dotenv.config();
 const createUser = async (req, res) => {
   try {
@@ -57,6 +58,17 @@ const createUser = async (req, res) => {
   }
 };
 
+const createMany = async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("body: ", data)
+    const response = await UserService.createMany(data);
+    return res.status(201).json(response);
+  }catch(err) {
+    return res.status(404).json(err);
+  }
+}
+
 const loginUser = async (req, res) => {
   try {
     const response = await UserService.loginUser(req.body);
@@ -100,9 +112,14 @@ const refreshToken = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const response = await UserService.getAllUser();
+    const { page = 1, limit = 9, sort, find, filters } = req.query;
+    // console.log(`page: ${page}, limit: ${limit}`);
+    // console.log(`sort: ${sort}`);
+    // console.log(`filters: ${filters}`);
+    const response = await UserService.getAllUser({ page, limit }, sort, find, filters);
     return res.status(200).json(response);
   } catch (error) {
+    console.log("error: ", error)
     return res.status(404).json({
       message: error,
     });
@@ -139,9 +156,9 @@ const updateUser = async (req, res) => {
         });
       }
       // console.log("role: ", user?.role);
-     
+
       if (user?.role === "user") {
-        const response = await UserService.updateUser(userId, data, imageFile,"user");
+        const response = await UserService.updateUser(userId, data, imageFile, "user");
         const refresh_token = response.data.refresh_token;
         res.cookie('refresh_token', refresh_token, {
           httpOnly: true,
@@ -152,7 +169,7 @@ const updateUser = async (req, res) => {
         })
         return res.status(200).json(response);
       } else if (user?.role === "admin") {
-        const response = await UserService.updateUser(userId, data, imageFile,"admin");
+        const response = await UserService.updateUser(userId, data, imageFile, "admin");
         return res.status(200).json(response);
       }
     });
@@ -374,6 +391,7 @@ const logout = async (req, res) => {
 
 export {
   createUser,
+  createMany,
   loginUser,
   refreshToken,
   getAllUser,

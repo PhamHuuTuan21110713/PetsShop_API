@@ -23,7 +23,7 @@ const authAdminMiddleware = (req, res, next) => {
       });
     }
     if (user?.role === "admin") {
-      // console.log("thanhcong")
+      console.log("thanhcong voi admin")
       next();
     } else {
       // console.log("loi2")

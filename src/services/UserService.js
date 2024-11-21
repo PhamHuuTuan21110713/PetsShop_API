@@ -12,6 +12,44 @@ import { v2 as cloudinary } from "cloudinary";
 import JWTService from './JWTService';
 import nodemailer from 'nodemailer';
 
+const createMany = (data) => {
+  return new Promise(async (rs, rj) => {
+    try {
+      const newData = data.map((da, index) => {
+        const hashPassword = bcrypt.hashSync(da.password, 12);
+        return {
+          ...da,
+          password: hashPassword,
+          shippingAddress: [
+            {
+              recipientName: da.name,
+              recipientPhone: da.phone,
+              address: da.address,
+              isDefault: true,
+            }
+          ],
+          cart: [],
+        }
+      })
+      const users = await User.insertMany(newData, { ordered: false });
+      if (users.length === data.length) {
+        rs({
+          status: "OK",
+          message: "Tất cả dữ liệu đã được thêm vào",
+          data: users
+        })
+      } else if (users.length > 0) {
+        rs({
+          status: "OK",
+          message: "Thêm thành công, nhưng không thêm được toàn bộ",
+          data: users
+        })
+      }
+    } catch (err) {
+      rj(err);
+    }
+  })
+}
 
 const createUser = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -156,15 +194,44 @@ const loginUser = (data) => {
   });
 };
 
-const getAllUser = () => {
+const getAllUser = (paging, sorting, find, condition) => {
+  const page = parseInt(paging.page);
+  const limit = parseInt(paging.limit);
+  // console.log("loi o cond: ",condition)
+  let _condition =
+    condition ? JSON.parse(condition) :
+      {};
+  // console.log("loi o sỏt: ",sorting);
+  let _sorting = sorting ? JSON.parse(sorting) : { createdAt: -1 };
+
+  if (find) {
+    _condition = {
+      ..._condition,
+      $or: [
+        { name: { $regex: find, $options: "i" } },
+        { email: { $regex: find, $options: "i" } },
+        { address: { $regex: find, $options: "i" } },
+        { phone: { $regex: find, $options: "i" } },
+        { _id: find.length === 24 ? find : null }
+      ],
+    }
+  }
   return new Promise(async (resolve, reject) => {
     try {
-      const userList = await User.find();
+      const userList = await User.find(_condition)
+        .sort(_sorting)
+        .skip((page - 1) * limit)
+        .limit(limit);
+      const totalDocuments = await User.countDocuments(_condition);
+      const totalPages = Math.ceil(totalDocuments / limit);
       if (userList) {
         resolve({
           status: "OK",
           message: "Lấy danh sách tài khoản thành công!",
           data: userList,
+          currentPage: page,
+          totalPages: totalPages,
+          totalItems: totalDocuments,
         });
       }
     } catch (error) {
@@ -952,6 +1019,7 @@ const sendMessage = (data) => {
 };
 
 export {
+  createMany,
   createUser,
   loginUser,
   getAllUser,

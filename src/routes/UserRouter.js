@@ -16,6 +16,7 @@ import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddl
 router.route('/')
 
   .get(authAdminMiddleware, UserController.getAllUser)
+  .post(authAdminMiddleware, UserController.createMany)
 // .get( UserController.getAllUser)
 
 router.route('/:id')
