@@ -16,7 +16,7 @@ const createMany = (data) => {
   return new Promise(async (rs, rj) => {
     try {
       const newData = data.map((da, index) => {
-        const hashPassword = bcrypt.hashSync(da.password, 12);
+        const hashPassword = bcrypt.hashSync(da.password.toString(), 12);
         return {
           ...da,
           password: hashPassword,
@@ -46,6 +46,7 @@ const createMany = (data) => {
         })
       }
     } catch (err) {
+      console.log(err);
       rj(err);
     }
   })
