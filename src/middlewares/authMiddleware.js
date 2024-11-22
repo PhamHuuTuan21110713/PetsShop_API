@@ -55,6 +55,7 @@ const authUserMiddleware = (req, res, next) => {
       });
     }
     if (user?.role === "admin" || user?.id === userId) {
+      console.log("thanh cong voi user or admin")
       next();
     } else {
       return res.status(401).json({

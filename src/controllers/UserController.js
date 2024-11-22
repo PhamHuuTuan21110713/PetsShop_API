@@ -132,9 +132,7 @@ const getUserById = async (req, res) => {
     const response = await UserService.getUserById(userId);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(404).json({
-      message: error,
-    });
+    return res.status(404).json(error);
   }
 };
 
