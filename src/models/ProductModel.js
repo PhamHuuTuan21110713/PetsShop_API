@@ -36,6 +36,7 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
+    state: { type: Number, required: false, enum: [0, 1], default: 1 }
   },
   { timestamps: true }
 );
