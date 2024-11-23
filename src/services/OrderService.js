@@ -101,12 +101,106 @@ const createOrder = (data) => {
 
 
 
-const getOrderByUser = (userId) => {
+const getOrderByUser = (userId, filter, finding) => {
+  let _filter = JSON.parse(filter);
   return new Promise(async (resolve, reject) => {
     try {
-      const orders = await Order.find({ customerId: userId }).sort({
-        orderDate: -1,
-      });
+      if (_filter.year) {
+        // console.log("_ffff: ", _filter)
+        const startOfYear = new Date(`${parseInt(_filter.year)}-01-01T17:46:04.630+00:00`);
+        const endOfYear = new Date(`${parseInt(parseInt(_filter.year) + 1)}-01-01T17:46:04.630+00:00`);
+        _filter = {
+          ..._filter,
+          "orderDate": {
+            $gte: startOfYear,
+            $lt: endOfYear
+          }
+        }
+        delete _filter.year
+      }
+     
+
+      const orders = await Order.aggregate([
+        {
+          $match: {
+            customerId: userId,
+            ..._filter
+          }
+        },
+        {
+          $addFields: {
+            products: {
+              $map: {
+                input: "$products",
+                as: "product",
+                in: {
+                  productId: { $toObjectId: "$$product.productId" }, // Chuyển sang ObjectId
+                  quantity: "$$product.quantity",
+                  price: "$$product.price",
+                },
+              },
+            },
+          },
+        },
+
+        // Bước 3: Kết nối với bảng `products` để lấy thông tin chi tiết
+        {
+          $lookup: {
+            from: "products", // Tên collection của Product
+            localField: "products.productId", // Trường productId trong mảng products
+            foreignField: "_id", // Trường _id của Product
+            as: "productDetails", // Kết quả sẽ gắn vào trường này
+          },
+        },
+        // Bước 4: Lọc theo tên sản phẩm
+        {
+          $match: {
+            "productDetails.name": { $regex: finding, $options: "i" } // Lọc theo tên sản phẩm
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            customerId: 1,
+            name: 1,
+            phone: 1,
+            address: 1,
+            orderDate: 1,
+            deliveryDate: 1,
+            products: {
+              $map: {
+                input: "$products",
+                as: "product",
+                in: {
+                  productId: "$$product.productId",
+                  quantity: "$$product.quantity",
+                  price: "$$product.price",
+                  details: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productDetails",
+                          as: "detail",
+                          cond: {
+                            $eq: ["$$detail._id", "$$product.productId"],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+            status: 1,
+            shippingFee: 1,
+            totalPrice: 1,
+            note: 1,
+            paymentMethod: 1,
+            state: 1,
+          },
+        },
+      ])
       if (orders !== null && orders.length > 0) {
         resolve({
           status: "OK",

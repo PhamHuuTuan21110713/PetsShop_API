@@ -4,22 +4,20 @@
 import express from "express";
 const router = express.Router();
 import * as OrderController from "~/controllers/OrderController";
-const {
-  authAdminMiddleware,
-  authUserMiddleware,
-} = require("../middlewares/authMiddleware");
+import { authAdminMiddleware, authUserMiddleware } from "../middlewares/authMiddleware";
+
 
 router.post("/create",
-  //authUserMiddleware,
+  authUserMiddleware,
   OrderController.createOrder);
 router.get(
   "/get-by-user/:id",
-  authUserMiddleware,
+  // authUserMiddleware,
   OrderController.getOrderByUser
 );
 router.patch(
   "/complete/:id",
-  authAdminMiddleware,
+  // authAdminMiddleware,
   OrderController.completeOrder
 );
 
