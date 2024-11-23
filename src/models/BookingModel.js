@@ -13,7 +13,7 @@ const BookingSchema = new mongoose.Schema(
         type: String,
         required: true
     },
-    status: {type: String, enum: ["dang-xac-nhan", "da-xac-nhan", "da-thanh-toan", "da-huy"], default:"dang-xac-nhan"},
+    status: {type: String, enum: ["dang-xac-nhan", "da-xac-nhan", "hoan-thanh", "da-huy"], default:"dang-xac-nhan"},
     totalPrice: {type: Number, required: true},
     petWeight: {type:Number, required: true},
     detailPet: {type: String, required: false, default: ""},
