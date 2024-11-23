@@ -19,9 +19,14 @@ const createOrder = async (req, res) => {
 const getOrderByUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const response = await OrderService.getOrderByUser(userId);
+    const {filter = {}, finding =""} = req.query;
+    // console.log("filter", filter);
+    // console.log("finding", finding);
+    const response = await OrderService.getOrderByUser(userId, filter, finding);
+
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error);
     return res.status(404).json({
       message: error,
     });

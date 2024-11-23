@@ -11,7 +11,46 @@ import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from "cloudinary";
 import JWTService from './JWTService';
 import nodemailer from 'nodemailer';
-import jwt from 'jsonwebtoken';
+
+const createMany = (data) => {
+  return new Promise(async (rs, rj) => {
+    try {
+      const newData = data.map((da, index) => {
+        const hashPassword = bcrypt.hashSync(da.password.toString(), 12);
+        return {
+          ...da,
+          password: hashPassword,
+          shippingAddress: [
+            {
+              recipientName: da.name,
+              recipientPhone: da.phone,
+              address: da.address,
+              isDefault: true,
+            }
+          ],
+          cart: [],
+        }
+      })
+      const users = await User.insertMany(newData, { ordered: false });
+      if (users.length === data.length) {
+        rs({
+          status: "OK",
+          message: "Tất cả dữ liệu đã được thêm vào",
+          data: users
+        })
+      } else if (users.length > 0) {
+        rs({
+          status: "OK",
+          message: "Thêm thành công, nhưng không thêm được toàn bộ",
+          data: users
+        })
+      }
+    } catch (err) {
+      console.log(err);
+      rj(err);
+    }
+  })
+}
 
 const createUser = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -156,15 +195,44 @@ const loginUser = (data) => {
   });
 };
 
-const getAllUser = () => {
+const getAllUser = (paging, sorting, find, condition) => {
+  const page = parseInt(paging.page);
+  const limit = parseInt(paging.limit);
+  // console.log("loi o cond: ",condition)
+  let _condition =
+    condition ? JSON.parse(condition) :
+      {};
+  // console.log("loi o sỏt: ",sorting);
+  let _sorting = sorting ? JSON.parse(sorting) : { createdAt: -1 };
+
+  if (find) {
+    _condition = {
+      ..._condition,
+      $or: [
+        { name: { $regex: find, $options: "i" } },
+        { email: { $regex: find, $options: "i" } },
+        { address: { $regex: find, $options: "i" } },
+        { phone: { $regex: find, $options: "i" } },
+        { _id: find.length === 24 ? find : null }
+      ],
+    }
+  }
   return new Promise(async (resolve, reject) => {
     try {
-      const userList = await User.find();
+      const userList = await User.find(_condition)
+        .sort(_sorting)
+        .skip((page - 1) * limit)
+        .limit(limit);
+      const totalDocuments = await User.countDocuments(_condition);
+      const totalPages = Math.ceil(totalDocuments / limit);
       if (userList) {
         resolve({
           status: "OK",
           message: "Lấy danh sách tài khoản thành công!",
           data: userList,
+          currentPage: page,
+          totalPages: totalPages,
+          totalItems: totalDocuments,
         });
       }
     } catch (error) {
@@ -194,10 +262,10 @@ const getUserById = (userId) => {
   });
 };
 
-const updateUser = (userId, data, imageFile) => {
+const updateUser = (userId, data, imageFile, role) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { name, email, phone, gender, address } = data;
+      const { name, email, phone, gender, address, state = 1 } = data;
       const checkUserByPhone = await User.findOne({ phone });
       if (checkUserByPhone && checkUserByPhone.phone !== phone) {
         reject({
@@ -209,7 +277,7 @@ const updateUser = (userId, data, imageFile) => {
       if (!user) {
         if (imageFile) {
           cloudinary.uploader.destroy(imageFile.filename);
-          console.log("deleting prev avatar when error")
+          console.log("deleting prev avatar when can't find user")
         }
         reject({
           status: "ERR",
@@ -235,32 +303,46 @@ const updateUser = (userId, data, imageFile) => {
           phone,
           avatar,
           gender,
-          address
+          address,
+          state: parseInt(state)
         },
         { new: true, runValidators: true }
       );
-      const access_token = await JWTService.generateAccessToken({
-        id: updatedUser._id,
-        role: updatedUser.role,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-      });
-      const refresh_token = await JWTService.generateRefreshToken({
-        id: updatedUser._id,
-        role: updatedUser.role,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-      });
-      resolve({
-        status: "OK",
-        message: "Cập nhật tài khoản thành công!",
-        data: {
-          access_token,
-          refresh_token,
-          user: updatedUser
-        },
-      });
+      if (role === "admin") {
+        resolve({
+          status: "OK",
+          message: "Cập nhật tài khoản thành công!",
+          data: updatedUser
+        })
+      } else if (role === "user") {
+
+        const access_token = await JWTService.generateAccessToken({
+          id: updatedUser._id,
+          role: updatedUser.role,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        });
+        const refresh_token = await JWTService.generateRefreshToken({
+          id: updatedUser._id,
+          role: updatedUser.role,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        });
+        resolve({
+          status: "OK",
+          message: "Cập nhật tài khoản thành công!",
+          data: {
+            access_token,
+            refresh_token,
+            user: updatedUser
+          },
+        });
+      }
     } catch (error) {
+      if (imageFile) {
+        cloudinary.uploader.destroy(imageFile.filename);
+        console.log("deleting prev avatar when error")
+      }
       reject(error);
     }
   });
@@ -516,7 +598,7 @@ const payment = (userId, data) => {
         const secretKey = 'MOMO_SECRET_KEY'; // Replace with your actual MoMo secret key
         const redirectUrl = 'YOUR_REDIRECT_URL'; // Replace with your actual redirect URL after payment
         const ipnUrl = 'YOUR_IPN_URL'; // Replace with your actual IPN (Instant Payment Notification) URL
-        
+
         const orderInfo = `Đơn hàng từ ${name}, điện thoại: ${phone}, tổng giá trị: ${totalAmount}`;
         const amount = totalAmount; // The total amount to pay
 
@@ -938,6 +1020,7 @@ const sendMessage = (data) => {
 };
 
 export {
+  createMany,
   createUser,
   loginUser,
   getAllUser,

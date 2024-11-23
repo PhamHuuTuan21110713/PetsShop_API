@@ -6,7 +6,10 @@ import * as UserService from "~/services/UserService";
 import JWTService from "~/services/JWTService";
 import { v2 as cloudinary } from "cloudinary";
 import useragent from "useragent";
-
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import User from "~/models/UserModel";
+dotenv.config();
 const createUser = async (req, res) => {
   try {
     const { name, email, password, confirmPassword, address, phone } =
@@ -55,6 +58,17 @@ const createUser = async (req, res) => {
   }
 };
 
+const createMany = async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("body: ", data)
+    const response = await UserService.createMany(data);
+    return res.status(201).json(response);
+  }catch(err) {
+    return res.status(404).json(err);
+  }
+}
+
 const loginUser = async (req, res) => {
   try {
     const response = await UserService.loginUser(req.body);
@@ -98,9 +112,14 @@ const refreshToken = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const response = await UserService.getAllUser();
+    const { page = 1, limit = 9, sort, find, filters } = req.query;
+    // console.log(`page: ${page}, limit: ${limit}`);
+    // console.log(`sort: ${sort}`);
+    // console.log(`filters: ${filters}`);
+    const response = await UserService.getAllUser({ page, limit }, sort, find, filters);
     return res.status(200).json(response);
   } catch (error) {
+    console.log("error: ", error)
     return res.status(404).json({
       message: error,
     });
@@ -113,9 +132,7 @@ const getUserById = async (req, res) => {
     const response = await UserService.getUserById(userId);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(404).json({
-      message: error,
-    });
+    return res.status(404).json(error);
   }
 };
 
@@ -125,16 +142,36 @@ const updateUser = async (req, res) => {
     const imageFile = req.file;
     console.log("avatar file: ", imageFile);
     const data = req.body;
-    const response = await UserService.updateUser(userId, data, imageFile);
-    const refresh_token = response.data.refresh_token;
-    res.cookie('refresh_token', refresh_token, {
-      httpOnly: true,
-      // secure: true,        
-      sameSite: 'Strict',
-      maxAge: 24 * 60 * 60 * 1000
-      // maxAge: 10000  // 
-    })
-    return res.status(200).json(response);
+
+    const authorizationHeader = req.headers['authorization'];
+    const token = authorizationHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, async function (err, user) {
+      if (err) {
+        // console.log("ërror: ", err)
+        return res.status(401).json({
+          status: "ERR",
+          message: "THE AUTHORIZATION",
+        });
+      }
+      // console.log("role: ", user?.role);
+
+      if (user?.role === "user") {
+        const response = await UserService.updateUser(userId, data, imageFile, "user");
+        const refresh_token = response.data.refresh_token;
+        res.cookie('refresh_token', refresh_token, {
+          httpOnly: true,
+          // secure: true,        
+          sameSite: 'Strict',
+          maxAge: 24 * 60 * 60 * 1000
+          // maxAge: 10000  // 
+        })
+        return res.status(200).json(response);
+      } else if (user?.role === "admin") {
+        const response = await UserService.updateUser(userId, data, imageFile, "admin");
+        return res.status(200).json(response);
+      }
+    });
+
   } catch (error) {
     return res.status(404).json({
       message: error,
@@ -211,19 +248,19 @@ const updateCart = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
   try {
-      const userId = req.params.id;
-      const { productId } = req.body;
-      console.log("Received userId:", userId, "and productId:", productId);  // In ra để kiểm tra
-      if (!productId) {
-          return res.status(400).json({ message: "Product ID is required" });
-      }
-      const response = await UserService.removeFromCart(userId, productId);
-      return res.status(200).json(response);
+    const userId = req.params.id;
+    const { productId } = req.body;
+    console.log("Received userId:", userId, "and productId:", productId);  // In ra để kiểm tra
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+    const response = await UserService.removeFromCart(userId, productId);
+    return res.status(200).json(response);
   } catch (error) {
-      console.error("Error removing from cart:", error);  // In ra để kiểm tra lỗi
-      return res.status(400).json({
-          message: error.message || "An error occurred while removing the product from the cart",
-      });
+    console.error("Error removing from cart:", error);  // In ra để kiểm tra lỗi
+    return res.status(400).json({
+      message: error.message || "An error occurred while removing the product from the cart",
+    });
   }
 };
 
@@ -352,6 +389,7 @@ const logout = async (req, res) => {
 
 export {
   createUser,
+  createMany,
   loginUser,
   refreshToken,
   getAllUser,
