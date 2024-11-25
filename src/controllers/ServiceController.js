@@ -14,11 +14,14 @@ const createService = async (req, res) => {
 
 const getAllServices = async (req, res) => {
     try {
-        const response = await ServiceService.getAllServices();
+        const {filter = "{}",sort="{}", find = ""} = req.query;
+
+        const response = await ServiceService.getAllServices(sort,filter ,find);
         if(response) {
             return res.status(200).json(response);
         }
     }catch(err) {
+        console.log("error Get all services: ", err)
         return res.status(404).json(err);
     }
 }
