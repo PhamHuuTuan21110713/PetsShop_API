@@ -19,21 +19,43 @@ const createProduct = async (req, res) => {
   }
 };
 
+
+
+// const addThumbnail = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     console.log("Có id trong controller", id);
+    
+//     // Kiểm tra nếu ObjectId không hợp lệ
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({
+//         status: "ERR",
+//         message: "ID sản phẩm không hợp lệ!",
+//       });
+//     }
+//     console.log("Adding thumbnail for product id:", req.params.id); 
+
+//     const imageFile = req.file;
+//     const response = await ProductService.addThumbnail(objectId, imageFile); // Gửi objectId vào service
+//     return res.status(200).json(response);
+//   } catch (error) {
+//     return res.status(404).json({
+//       message: error,
+//     });
+//   }
+// };
+
 const addThumbnail = async (req, res) => {
   try {
     const id = req.params.id;
-    if (!id) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Các trường không được để trống!",
-      });
-    }
+
     const imageFile = req.file;
     const response = await ProductService.addThumbnail(id, imageFile);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(404).json({
-      message: error,
+    console.error("Error in addThumbnail:", error);  // Log chi tiết lỗi
+    return res.status(500).json({
+      message: error.message || "Lỗi server khi xử lý yêu cầu!",
     });
   }
 };
@@ -44,13 +66,20 @@ const getProducts = async (req, res) => {
       limit,
       page,
       sort_by,
-      order,
       price_min,
       price_max,
       rating_filter,
       name,
       type,
     } = req.query;
+    console.log("sold: ", sort_by);
+    
+    // Nếu sort_by là 'sold', mặc định là 'desc' (giảm dần)
+    let order = 'asc'; // Mặc định là 'asc'
+    if (sort_by === 'sold') {
+      order = 'desc'; // Nếu sort_by là 'sold', sắp xếp giảm dần
+    }
+    
     const response = await ProductService.getProducts(
       Number(limit) || 9,
       Number(page) || 1,

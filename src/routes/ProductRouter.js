@@ -11,7 +11,7 @@ import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
 router.post(
   "/",
-  //authAdminMiddleware,
+  authAdminMiddleware,
   uploadProductCloud.single("image"),
   ProductController.createProduct
 );

@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
-    state: { type: Number, required: false, enum: [0, 1], default: 1 }
+    state: { type: Boolean, required: false, enum: [true, false], default: true }
   },
   { timestamps: true }
 );

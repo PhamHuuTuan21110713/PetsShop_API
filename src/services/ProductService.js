@@ -12,7 +12,6 @@ const createProduct = (data, imageFile) => {
       desc,
       type,
       price,
-      price_before_discount,
       quantity,
       sold,
       view,
@@ -39,7 +38,6 @@ const createProduct = (data, imageFile) => {
           desc,
           type,
           price,
-          price_before_discount,
           quantity,
           sold,
           view,
@@ -67,14 +65,16 @@ const addThumbnail = (productId, imageFile) => {
   return new Promise(async (resolve, reject) => {
     try {
       const product = await Product.findById(productId);
+      console.log("san pham them anh: ", product);
+      
       if (product) {
-        const img = imageFile?.path;
+        const imgUrl = imageFile?.path;
         const imgPath = imageFile?.filename;
-        thumbnail = product.thumbnail;
-        thumbnail.push({ url: img, path: imgPath });
-        newData = { ...product, thumbnail };
+        let thumbnail = product.thumbnail || []; // Khởi tạo nếu chưa có
+        thumbnail.push({ url: imgUrl, path: imgPath });
+        const newData = { ...product, thumbnail };
 
-        updatedProduct = await Product.findByIdAndUpdate(productId, newData, {
+        const updatedProduct = await Product.findByIdAndUpdate(productId, newData, {
           new: true,
         });
         resolve({
@@ -119,8 +119,10 @@ const getProducts = (
       const counter = await Product.countDocuments(filter);
       let products;
       if (sort_by && order) {
+        // Chuyển đổi order từ 'asc' và 'desc' thành số 1 và -1
+        const sortOrder = order === 'desc' ? -1 : 1;
         products = await Product.find(filter)
-          .sort({ [sort_by]: order })
+          .sort({ [sort_by]: sortOrder })
           .limit(limit)
           .skip(limit * (page - 1));
       } else {
