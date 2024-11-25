@@ -19,8 +19,7 @@ const createOrder = async (req, res) => {
 const getOrderByUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const {filter = {}, finding =""} = req.query;
-    // console.log("filter", filter);
+    const {filter = "{}", finding =""} = req.query;
     // console.log("finding", finding);
     const response = await OrderService.getOrderByUser(userId, filter, finding);
 
