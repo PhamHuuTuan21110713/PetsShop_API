@@ -7,56 +7,44 @@ import Product from "~/models/ProductModel";
 import { DateTime } from "luxon";
 import mongoose from "mongoose";
 
-const createOrder = (data) => {
-  return new Promise(async (resolve, reject) => {
-    const { customerId, products, totalAmount, shippingFee, note, paymentMethod, address } = data;
+const createOrder = async (data) => {
+  const { customerId, products, totalAmount, shippingFee, note, paymentMethod, address } = data;
 
-    try {
-      // Kiểm tra người dùng
-      const user = await User.findById(customerId);
-      if (!user) {
-        return reject(new Error("Người dùng không tồn tại"));
+  const session = await mongoose.startSession();  // Khởi tạo phiên giao dịch (transaction)
+  session.startTransaction();
+
+  try {
+    // Kiểm tra người dùng
+    const user = await User.findById(customerId).session(session);
+    if (!user) {
+      throw new Error("Người dùng không tồn tại");
+    }
+
+    // Kiểm tra tồn kho cho tất cả sản phẩm
+    const insufficientStock = [];
+    const productIds = products.map(product => product.productId);
+    const existingProducts = await Product.find({ _id: { $in: productIds } }).session(session);
+
+    for (const product of products) {
+      const existingProduct = existingProducts.find(p => p._id.toString() === product.productId);
+      if (!existingProduct) {
+        insufficientStock.push(`Sản phẩm với ID ${product.productId} không tồn tại`);
+      } else if (existingProduct.quantity < product.quantity) {
+        insufficientStock.push(`Không đủ số lượng cho sản phẩm: ${existingProduct.name}`);
       }
+    }
 
-      // Duyệt qua từng sản phẩm trong mảng `products`
-      const insufficientStock = [];
-      for (const product of products) {
-        const { productId, quantity } = product;
+    if (insufficientStock.length > 0) {
+      throw new Error(`Không đủ số lượng cho các sản phẩm: ${insufficientStock.join(', ')}`);
+    }
 
-        // Chuyển productId sang ObjectId nếu chưa phải là ObjectId
-        const productObjectId = new mongoose.Types.ObjectId(productId);
+    // Tiến hành tạo đơn hàng
+    const orderDate = DateTime.local().toISO();
+    const deliveryDate = DateTime.fromISO(orderDate).plus({ minutes: 30 }).toISO();
+    const { name, phone } = user;
 
-        // Tìm sản phẩm trong cơ sở dữ liệu bằng `productId`
-        const existingProduct = await Product.findById(productObjectId);
-        console.log("Sản phẩm tìm thấy:", existingProduct);
-
-        try {
-          if (!existingProduct) {
-            insufficientStock.push(`Sản phẩm với ID ${productId} không tồn tại`);
-          } else {
-            // Kiểm tra số lượng tồn kho
-            if (existingProduct.quantity < quantity) {
-              insufficientStock.push(`Không đủ số lượng cho sản phẩm: ${existingProduct.name}`);
-            }
-          }
-        } catch (error) {
-          console.error("Lỗi khi tìm sản phẩm:", error);
-          insufficientStock.push(`Lỗi khi tìm sản phẩm với ID ${productId}`);
-        }
-      }
-
-      // Nếu có sản phẩm thiếu hàng, từ chối đơn hàng
-      if (insufficientStock.length > 0) {
-        return reject(new Error(`Không đủ số lượng cho các sản phẩm: ${insufficientStock.join(', ')}`));
-      }
-
-      // Nếu không có vấn đề về kho, tiếp tục tạo đơn hàng
-      const orderDate = DateTime.local().toISO();
-      const deliveryDate = DateTime.fromISO(orderDate).plus({ minutes: 30 }).toISO();
-      const { name, phone } = user;
-
-      // Tạo đơn hàng
-      const newOrder = await Order.create({
+    const newOrder = await Order.create(
+      [{
         customerId,
         name,
         phone,
@@ -68,35 +56,52 @@ const createOrder = (data) => {
         shippingFee,
         note,
         paymentMethod,
-      });
-      console.log('New Order created:', newOrder);
+      }],
+      { session } // Đảm bảo tạo đơn hàng trong cùng một session (giao dịch)
+    );
 
-      // Trừ số lượng sản phẩm trong kho
-      for (const product of products) {
-        const { productId, quantity } = product;
+    const updatePromises = products.map(product =>
+      Product.updateOne(
+        { _id: product.productId },
+        { 
+          $inc: {
+            quantity: -product.quantity,  // Giảm quantity theo số lượng bán
+            sold: product.quantity        // Tăng sold theo số lượng bán
+          }
+        },
+        { session }
+      )
+    );
+    
+    await Promise.all(updatePromises);
 
-        // Cập nhật số lượng tồn kho của sản phẩm
-        await Product.updateOne(
-          { _id: productId },
-          { $inc: { quantity: -quantity } } // Giảm số lượng trong kho
-        );
-        console.log(`Đã trừ ${quantity} sản phẩm với ID ${productId} khỏi kho`);
-      }
+    // Xóa các sản phẩm đã đặt khỏi giỏ hàng của người dùng
+    const productIdsToRemove = products.map(product => product.productId);
+    await User.updateOne(
+      { _id: customerId },
+      { $pull: { cart: { productId: { $in: productIdsToRemove } } } }, // Xóa sản phẩm khỏi giỏ hàng
+      { session }
+    );
 
-      // Xóa giỏ hàng của người dùng sau khi tạo đơn hàng
-      await User.updateOne({ _id: customerId }, { $set: { cart: [] } });
-      console.log('User cart cleared for user:', customerId);
+    // Commit giao dịch nếu tất cả thành công
+    await session.commitTransaction();
+    session.endSession();
 
-      resolve({
-        status: "OK",
-        message: "Thêm đơn hàng thành công!",
-        data: newOrder,
-      });
-    } catch (error) {
-      console.error("Error creating order:", error);
-      reject(error);
+    return {
+      status: "OK",
+      message: "Thêm đơn hàng thành công!",
+      data: newOrder[0],  // Trả về đơn hàng vừa tạo
+    };
+
+  } catch (error) {
+    // Rollback giao dịch nếu có lỗi xảy ra
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+      session.endSession();
     }
-  });
+    console.error("Error creating order:", error);
+    throw error;  // Ném lỗi để phía client xử lý
+  }
 };
 
 
