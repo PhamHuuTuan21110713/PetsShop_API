@@ -11,7 +11,7 @@ import { authAdminMiddleware } from "~/middlewares/authMiddleware";
 
 router.post(
   "/",
-  //authAdminMiddleware,
+  authAdminMiddleware,
   uploadProductCloud.single("image"),
   ProductController.createProduct
 );
@@ -26,7 +26,7 @@ router.get('/best-selling-products', ProductController.getBestSellingProducts);
 router.get("/:id", ProductController.getProductById);
 router.patch(
   "/:id",
-  authAdminMiddleware,
+  //authAdminMiddleware,
   uploadProductCloud.single("image"),
   ProductController.updateProduct
 );
