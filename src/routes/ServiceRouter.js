@@ -6,7 +6,7 @@ const router = express.Router();
 router.route("/")
     .get(ServiceController.getAllServices)
    
-    .post(ServiceController.createService) 
+    .post(authAdminMiddleware,ServiceController.createService) 
 
 router.route("/:id")
     .get(ServiceController.getServiceById)
