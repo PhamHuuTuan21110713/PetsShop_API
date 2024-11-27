@@ -45,6 +45,7 @@ const getAll = (userId, filter, finding) => {
     return new Promise(async (rs, rj) => {
         try {
             let _filter = JSON.parse(filter);
+            // console.log("filter: ", _filter);
             if (_filter.year) {
                 // console.log("_ffff: ", _filter)
                 const startOfYear = new Date(`${parseInt(_filter.year)}-01-01T17:46:04.630+00:00`);
@@ -81,14 +82,21 @@ const getAll = (userId, filter, finding) => {
                     const _finding = new mongoose.Types.ObjectId(finding);
                     condition = {
                         ..._filter,
-                        userId: _userId,
                         _id: _finding
                     }
                 } else {
                     condition = {
                         ..._filter,
-                        userId: _userId,
                     }
+                }
+            }
+            let { serviceId } = _filter;
+            if(serviceId) {
+                // console.log("serviceid: ", serviceId);
+                const reId = new mongoose.Types.ObjectId(serviceId);
+                condition = {
+                    ...condition,
+                    serviceId: reId
                 }
             }
             const data = await Booking.aggregate([

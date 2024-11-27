@@ -49,10 +49,21 @@ const updateService = async(req, res) => {
         return res.status(404).json(err);
     }
 }
-
+const deleteService = async(req, res) => {
+    try {
+        const id = req.params.id;
+        const data = {state: false};
+        // console.log("data", data);
+        const response = await ServiceService.updateService(id,data);
+        return res.status(200).json(response);
+    }catch(err) {
+        return res.status(404).json(err);
+    }
+}
 export default {
     createService,
     getAllServices,
     getServiceById,
-    updateService
+    updateService,
+    deleteService
 }
