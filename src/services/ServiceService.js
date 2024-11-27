@@ -9,7 +9,6 @@ const getServiceById = (id) => {
                 {
                     $match: {
                         _id: idobj,
-                        state: true
                     }
                 },
                 {
@@ -139,8 +138,26 @@ const getAllServices = (sort = { },filter, find) => {
     })
 }
 
+const updateService = (id, data) => {
+    return new Promise(async (rs, rj) => {
+        try {
+            const service = await Service.findByIdAndUpdate(id, data);
+            if(service) {
+                rs({
+                    status: "OK",
+                    message:"Cập nhật thành công",
+                    data: service
+                })
+            }
+        } catch (err) {
+            rj(err);
+        }
+    })
+}
+
 export default {
     getAllServices,
     createService,
-    getServiceById
+    getServiceById,
+    updateService
 }

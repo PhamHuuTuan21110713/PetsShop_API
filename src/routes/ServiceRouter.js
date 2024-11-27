@@ -10,6 +10,7 @@ router.route("/")
 
 router.route("/:id")
     .get(ServiceController.getServiceById)
+    .patch(authAdminMiddleware, ServiceController.updateService)
 
 
 
