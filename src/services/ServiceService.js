@@ -9,7 +9,6 @@ const getServiceById = (id) => {
                 {
                     $match: {
                         _id: idobj,
-                        state: true
                     }
                 },
                 {
@@ -108,10 +107,24 @@ const createService = (data) => {
     })
 }
 
-const getAllServices = () => {
+const getAllServices = (sort = { },filter, find) => {
     return new Promise(async (rs, rj) => {
         try {
-            const data = await Service.find();
+            
+            const sorting = JSON.parse(sort);
+            let condition = JSON.parse(filter);
+            if(find) {
+                condition = {
+                    ...condition,
+                    $or: [
+                        { name: { $regex: find, $options: "i" } },
+                        { _id: find.length === 24 ? find : null }
+                    ]
+                }
+            }
+            // console.log("getallservice filter: ", sorting);
+            const data = await Service.find(condition)
+                .sort(sorting);
             if (data) {
                 rs({
                     status: "OK",
@@ -125,8 +138,26 @@ const getAllServices = () => {
     })
 }
 
+const updateService = (id, data) => {
+    return new Promise(async (rs, rj) => {
+        try {
+            const service = await Service.findByIdAndUpdate(id, data);
+            if(service) {
+                rs({
+                    status: "OK",
+                    message:"Cập nhật thành công",
+                    data: service
+                })
+            }
+        } catch (err) {
+            rj(err);
+        }
+    })
+}
+
 export default {
     getAllServices,
     createService,
-    getServiceById
+    getServiceById,
+    updateService
 }

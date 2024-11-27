@@ -6,11 +6,12 @@ const router = express.Router();
 router.route("/")
     .get(ServiceController.getAllServices)
    
-    .post(ServiceController.createService) 
+    .post(authAdminMiddleware,ServiceController.createService) 
 
 router.route("/:id")
     .get(ServiceController.getServiceById)
-
+    .patch(authAdminMiddleware, ServiceController.updateService)
+    .delete(authAdminMiddleware, ServiceController.deleteService)
 
 
 export default router;
