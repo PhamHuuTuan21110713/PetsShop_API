@@ -3,12 +3,14 @@ import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddl
 import PromotionController from "~/controllers/PromotionController";
 const router = express.Router();
 router.route("/")
-    .get(PromotionController.getAllPromotions)
+    .get(authAdminMiddleware, PromotionController.getAllPromotions)
     // .post(authAdminMiddleware, PromotionController.createPromotion)
-    .post( PromotionController.createPromotion) //test
+    .post(authAdminMiddleware, PromotionController.createPromotion) //test
 
 router.route("/:id")
     .get(PromotionController.getPromotionById)
+
+router.patch("/update/:id", authAdminMiddleware, PromotionController.updatePromotion)
 
 
 

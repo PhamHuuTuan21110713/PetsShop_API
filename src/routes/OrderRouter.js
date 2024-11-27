@@ -8,13 +8,18 @@ import { authAdminMiddleware, authUserMiddleware } from "../middlewares/authMidd
 
 
 router.post("/create",
-  authUserMiddleware,
+  //authUserMiddleware,
   OrderController.createOrder);
+
+router.get("/", authAdminMiddleware, OrderController.getAllOrder)
 router.get(
   "/get-by-user/:id",
   // authUserMiddleware,
   OrderController.getOrderByUser
 );
+
+router.patch("/update/:id", authAdminMiddleware, OrderController.updateOrder)
+
 router.patch(
   "/complete/:id",
   // authAdminMiddleware,
