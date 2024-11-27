@@ -11,7 +11,7 @@ router.route("/")
 router.route("/:id")
     .get(ServiceController.getServiceById)
     .patch(authAdminMiddleware, ServiceController.updateService)
-
+    .delete(authAdminMiddleware, ServiceController.deleteService)
 
 
 export default router;
