@@ -158,6 +158,8 @@ const loginUser = (data) => {
           status: "ERR",
           message: "Email không tồn tại!",
         });
+
+
       }
       const checkPassword = bcrypt.compareSync(password, user.password);
       if (!checkPassword) {
@@ -620,7 +622,7 @@ const payment = (userId, data) => {
 
         const requestBody = JSON.stringify({
           partnerCode,
-          partnerName: "Test",
+          partnerName: "MOMO",
           storeId: "MomoTestStore",
           requestId,
           amount,
@@ -628,7 +630,7 @@ const payment = (userId, data) => {
           orderInfo,
           redirectUrl,
           ipnUrl,
-          lang,
+          lang: 'vi',
           requestType,
           autoCapture,
           extraData,
@@ -638,7 +640,7 @@ const payment = (userId, data) => {
         // MoMo API request options
         const options = {
           method: "POST",
-          url: "https://test-payment.momo.vn/v2/gateway/api/create",
+          url: "https://test-payment.momo.vn/v2/gateway/api/query",
           headers: {
             'content-type': 'application/json',
             'Content-Length': Buffer.byteLength(requestBody)

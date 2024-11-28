@@ -10,7 +10,7 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  
+
   products: [
     {
       productId: {
@@ -28,7 +28,7 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   status: {
-    type: String, required: true, enum: ["dxl", "dg", "tc", "hbs", "hbb"], 
+    type: String, required: true, enum: ["dxl", "dg", "tc", "hbs", "hbb"],
     default: "dxl"
   },
   shippingFee: {
@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema({
   },
   totalPrice: {
     type: Number,
-    required: false,
+    required: true,
   },
   note: {
     type: String,
@@ -48,7 +48,12 @@ const orderSchema = new mongoose.Schema({
     required: false,
     default: "cod",
   },
-  state: { type: Boolean, required: false, default: true }
+  state: { type: Boolean, required: false, default: true },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'success', 'failed', 'canceled'],
+    default: 'pending'
+  },
 });
 
 const Order = mongoose.model("Order", orderSchema);

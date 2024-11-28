@@ -5,11 +5,15 @@ import express from "express";
 const router = express.Router();
 import * as OrderController from "~/controllers/OrderController";
 import { authAdminMiddleware, authUserMiddleware } from "../middlewares/authMiddleware";
+import * as paymenController from "~/controllers/paymentController"
 
 
 router.post("/create",
   //authUserMiddleware,
   OrderController.createOrder);
+
+router.post("/payment", paymenController.createOrderAndProcessPayment)
+router.get("/vnpay-return", paymenController.vnPayReturn)
 
 router.get("/", authAdminMiddleware, OrderController.getAllOrder)
 router.get(
