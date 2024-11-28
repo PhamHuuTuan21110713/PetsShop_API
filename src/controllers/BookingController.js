@@ -12,9 +12,9 @@ const getById = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const { userId = "", filter = "{}", finding = "" } = req.query;
+        const { userId = "", filter = "{}", finding = "", sort, page , limit } = req.query;
         // console.log("filter: ", filter);
-        const response = await BookingService.getAll(userId, filter, finding);
+        const response = await BookingService.getAll(userId, filter, finding,sort,page,limit);
         if (response) return res.status(200).json(response);
     } catch (err) {
         return res.status(404).json(err);
