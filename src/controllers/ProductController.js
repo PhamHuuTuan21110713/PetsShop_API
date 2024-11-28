@@ -69,7 +69,6 @@ const getProducts = async (req, res) => {
       price_min,
       price_max,
       rating_filter,
-      name,
       type,
       filters = "{}" // Mặc định là một chuỗi JSON rỗng
     } = req.query;
@@ -87,6 +86,7 @@ const getProducts = async (req, res) => {
 
     // Kiểm tra nếu parsedFilters có productId và gán nó cho productId
     const productId = parsedFilters.productId || ""; // Nếu không có productId, gán giá trị mặc định là chuỗi rỗng
+    const name = parsedFilters.name || ""
 
     const response = await ProductService.getProducts(
       Number(limit) || 9,
@@ -96,7 +96,7 @@ const getProducts = async (req, res) => {
       Number(price_min) || 0,
       Number(price_max) || 999999999,
       Number(rating_filter) || 0,
-      name || "",
+      name,
       type || "",
       productId // Truyền productId vào hàm
     );
