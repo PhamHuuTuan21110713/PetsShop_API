@@ -40,12 +40,26 @@ const createNew = (data) => {
     })
 }
 
-const getAll = (userId, filter, finding) => {
+const getAll = (userId, filter, finding, sorting,page,limit) => {
 
     return new Promise(async (rs, rj) => {
         try {
             let _filter = JSON.parse(filter);
-            // console.log("filter: ", _filter);
+            let _sorting = {
+                bookingDate: -1 // Sắp xếp giảm dần theo bookingDate
+            };
+            let _page = null; let _limit = null;
+            if(page){
+                _page = parseInt(page)
+            }
+            if(limit) {
+                _limit = parseInt(limit);
+            }
+            if (sorting) {
+                const _sort = JSON.parse(sorting)
+                _sorting = {..._sort}; 
+            }
+            console.log("filter: ", _filter);
             if (_filter.year) {
                 // console.log("_ffff: ", _filter)
                 const startOfYear = new Date(`${parseInt(_filter.year)}-01-01T17:46:04.630+00:00`);
@@ -99,7 +113,7 @@ const getAll = (userId, filter, finding) => {
                     serviceId: reId
                 }
             }
-            const data = await Booking.aggregate([
+            const pepline = [
                 {
                     $match: condition
                 },
@@ -115,14 +129,53 @@ const getAll = (userId, filter, finding) => {
                     $addFields: {
                         serviceDetails: { $arrayElemAt: ["$serviceDetails", 0] } // Lấy phần tử đầu tiên
                     }
+                },
+                {
+                    $sort: _sorting
                 }
-            ])
-            if (data) {
-                rs({
-                    status: "OK",
-                    message: "Lấy danh sách đơn dịch vụ thành công",
-                    data
+                
+            ]
+            if( _page && _limit) {
+                pepline.push(
+                {
+                    $skip: (_page - 1) * _limit // Bỏ qua các bản ghi của các trang trước
+                },
+                {
+                    $limit: _limit // Lấy số lượng bản ghi cho trang hiện tại
                 })
+            }
+            let totalCount = 0;
+            let totalPages = 1;
+            if(_page && _limit) {
+                const totalDocs = await Booking.aggregate([
+                    { $match: condition },
+                    { $count: "total" } // Đếm tổng số document khớp với điều kiện
+                ]);
+                
+                // Lấy số lượng document (nếu không có document, mặc định là 0)
+                totalCount = totalDocs.length > 0 ? totalDocs[0].total : 0;
+                totalPages = _limit ? Math.ceil(totalCount / _limit) : 1;
+            }
+             
+            const data = await Booking.aggregate(pepline)
+            if (data) {
+                if(_limit && _page) {
+                    rs({
+                        status: "OK",
+                        message: "Lấy danh sách đơn dịch vụ thành công",
+                        data,
+                        totalDocs: totalCount,
+                        totalPages: totalPages,
+                        page: _page
+                    })
+                } else {
+                    rs({
+                        status: "OK",
+                        message: "Lấy danh sách đơn dịch vụ thành công",
+                        data
+                    })
+                }
+               
             }
         } catch (err) {
             console.log("ERR:", err)
