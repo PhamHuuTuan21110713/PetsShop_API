@@ -71,15 +71,23 @@ const getProducts = async (req, res) => {
       rating_filter,
       name,
       type,
+      filters = "{}" // Mặc định là một chuỗi JSON rỗng
     } = req.query;
-    console.log("sold: ", sort_by);
-    
+
+    // Giải mã filters từ chuỗi JSON thành đối tượng
+    const parsedFilters = JSON.parse(filters); // Chuyển chuỗi thành đối tượng
+
+    console.log("Filters received: ", parsedFilters.productId);
+
     // Nếu sort_by là 'sold', mặc định là 'desc' (giảm dần)
     let order = 'asc'; // Mặc định là 'asc'
     if (sort_by === 'sold') {
       order = 'desc'; // Nếu sort_by là 'sold', sắp xếp giảm dần
     }
-    
+
+    // Kiểm tra nếu parsedFilters có productId và gán nó cho productId
+    const productId = parsedFilters.productId || ""; // Nếu không có productId, gán giá trị mặc định là chuỗi rỗng
+
     const response = await ProductService.getProducts(
       Number(limit) || 9,
       Number(page) || 1,
@@ -89,15 +97,18 @@ const getProducts = async (req, res) => {
       Number(price_max) || 999999999,
       Number(rating_filter) || 0,
       name || "",
-      type || ""
+      type || "",
+      productId // Truyền productId vào hàm
     );
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
-      message: error,
+      message: error.message || error,
     });
   }
 };
+
+
 
 const getBestSellingProducts = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;

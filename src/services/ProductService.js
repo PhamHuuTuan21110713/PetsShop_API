@@ -106,21 +106,45 @@ const getProducts = (
   price_max,
   rating_filter,
   name,
-  type
+  type,
+  productId // Thêm tham số id
 ) => {
   return new Promise(async (resolve, reject) => {
+    console.log("ProductId in service:", productId); // Kiểm tra giá trị của productId
+    
     try {
-      const filter = {
-        price: { $gte: price_min, $lte: price_max },
-        rating: { $gte: rating_filter },
-        name: { $regex: new RegExp(name, "i") },
-        type: type || { $exists: true },
-      };
-      const counter = await Product.countDocuments(filter);
+      const filter = {};
+
+      // Thêm điều kiện lọc theo productId nếu có
+      if (productId && productId.trim() !== "") { // Kiểm tra nếu productId không phải là chuỗi rỗng
+        filter._id = productId; // Lọc theo _id nếu productId có giá trị
+      } else {
+        // Nếu productId không có, áp dụng các điều kiện lọc khác
+        
+        // Lọc theo giá
+        filter.price = { $gte: price_min, $lte: price_max };
+
+        // Lọc theo rating
+        filter.rating = { $gte: rating_filter };
+
+        // Lọc theo tên (sử dụng RegExp để tìm kiếm không phân biệt hoa/thường)
+        if (name) {
+          filter.name = { $regex: new RegExp(name, "i") };
+        }
+
+        // Lọc theo type (nếu có type)
+        if (type) {
+          filter.type = type;
+        } else {
+          filter.type = { $exists: true }; // Nếu không có type thì tìm tất cả sản phẩm có type
+        }
+      }
+
+      const counter = await Product.countDocuments(filter); // Đếm số sản phẩm thỏa mãn filter
+
       let products;
       if (sort_by && order) {
-        // Chuyển đổi order từ 'asc' và 'desc' thành số 1 và -1
-        const sortOrder = order === 'desc' ? -1 : 1;
+        const sortOrder = order === "desc" ? -1 : 1;
         products = await Product.find(filter)
           .sort({ [sort_by]: sortOrder })
           .limit(limit)
@@ -130,6 +154,7 @@ const getProducts = (
           .limit(limit)
           .skip(limit * (page - 1));
       }
+
       if (products) {
         resolve({
           status: "OK",
@@ -147,6 +172,58 @@ const getProducts = (
     }
   });
 };
+
+
+// const getProducts = (
+//   limit,
+//   page,
+//   sort_by,
+//   order,
+//   price_min,
+//   price_max,
+//   rating_filter,
+//   name,
+//   type
+// ) => {
+//   return new Promise(async (resolve, reject) => {
+//     try {
+//       const filter = {
+//         price: { $gte: price_min, $lte: price_max },
+//         rating: { $gte: rating_filter },
+//         name: { $regex: new RegExp(name, "i") },
+//         type: type || { $exists: true },
+//       };
+//       const counter = await Product.countDocuments(filter);
+//       let products;
+//       if (sort_by && order) {
+//         // Chuyển đổi order từ 'asc' và 'desc' thành số 1 và -1
+//         const sortOrder = order === 'desc' ? -1 : 1;
+//         products = await Product.find(filter)
+//           .sort({ [sort_by]: sortOrder })
+//           .limit(limit)
+//           .skip(limit * (page - 1));
+//       } else {
+//         products = await Product.find(filter)
+//           .limit(limit)
+//           .skip(limit * (page - 1));
+//       }
+//       if (products) {
+//         resolve({
+//           status: "OK",
+//           message: "Lấy danh sách sản phẩm thành công!",
+//           data: {
+//             products,
+//             currentPage: Number(page),
+//             totalPage: Math.ceil(counter / limit),
+//             totalProduct: counter,
+//           },
+//         });
+//       }
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+// };
 
 // const getBestSellingProducts = async (page = 1, limit = 10) => {
 //   try {

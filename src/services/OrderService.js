@@ -63,7 +63,7 @@ const createOrder = async (data) => {
     const updatePromises = products.map(product =>
       Product.updateOne(
         { _id: product.productId },
-        { 
+        {
           $inc: {
             quantity: -product.quantity,  // Giảm quantity theo số lượng bán
             sold: product.quantity        // Tăng sold theo số lượng bán
@@ -72,7 +72,7 @@ const createOrder = async (data) => {
         { session }
       )
     );
-    
+
     await Promise.all(updatePromises);
 
     // Xóa các sản phẩm đã đặt khỏi giỏ hàng của người dùng
@@ -104,6 +104,115 @@ const createOrder = async (data) => {
   }
 };
 
+const getAllOrder = async (page = 1, limit = 10, filters = {}) => {
+  try {
+    const skip = (page - 1) * limit;
+    let query = {};  // Khởi tạo query rỗng
+
+    // Kiểm tra và áp dụng từng điều kiện lọc nếu có
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.month && filters.year) {
+      query.orderDate = {
+        $gte: new Date(filters.year, filters.month - 1, 1),
+        $lt: new Date(filters.year, filters.month, 0)
+      };
+    }
+
+    if (filters.year && !filters.month) {  // Nếu chỉ có year mà không có month
+      query.orderDate = {
+        $gte: new Date(filters.year, 0, 1),
+        $lt: new Date(filters.year + 1, 0, 1)
+      };
+    }
+
+    if (filters.orderId) {
+      query._id = filters.orderId;
+    }
+
+    // Truy vấn database với điều kiện query đã tạo
+    const orders = await Order.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ orderDate: -1 });
+
+    const totalCount = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      status: "OK",
+      data: orders,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount
+      }
+    };
+
+  } catch (error) {
+    console.error("Error in getAllOrder:", error); // Log lỗi chi tiết
+    throw new Error("Lỗi khi lấy đơn hàng: " + error.message);
+  }
+};
+
+
+
+// const getAllOrder = async (page = 1, limit = 10, filters = {}) => {
+//   try {
+//     const skip = (page - 1) * limit;
+//     let query = {};
+
+//     // Áp dụng các filters
+//     if (filters.status) {
+//       query.status = filters.status;
+//     }
+
+//     if (filters.month) {
+//       query.orderDate = { 
+//         $gte: new Date(filters.year, filters.month - 1, 1), 
+//         $lt: new Date(filters.year, filters.month, 0) 
+//       };
+//     }
+
+//     if (filters.year) {
+//       query.orderDate = { 
+//         $gte: new Date(filters.year, 0, 1), 
+//         $lt: new Date(filters.year + 1, 0, 1) 
+//       };
+//     }
+
+//     if (filters.orderId) {
+//       query._id = filters.orderId;
+//     }
+
+//     // Truy vấn database
+//     const orders = await Order.find(query)
+//       .skip(skip)
+//       .limit(limit)
+//       .sort({ orderDate: -1 });
+
+//     const totalCount = await Order.countDocuments(query);
+//     const totalPages = Math.ceil(totalCount / limit);
+
+//     return {
+//       status: "OK",
+//       data: orders,
+//       pagination: {
+//         currentPage: page,
+//         totalPages: totalPages,
+//         totalCount: totalCount
+//       }
+//     };
+
+//   } catch (error) {
+//     console.error("Error in getAllOrder:", error); // Log lỗi chi tiết
+//     throw new Error("Lỗi khi lấy đơn hàng: " + error.message);
+//   }
+// };
+
+
 
 
 const getOrderByUser = (userId, filter, finding) => {
@@ -123,7 +232,7 @@ const getOrderByUser = (userId, filter, finding) => {
         }
         delete _filter.year
       }
-     
+
 
       const orders = await Order.aggregate([
         {
@@ -163,7 +272,7 @@ const getOrderByUser = (userId, filter, finding) => {
             "productDetails.name": { $regex: finding, $options: "i" } // Lọc theo tên sản phẩm
           }
         },
-        
+
         {
           $project: {
             _id: 1,
@@ -226,6 +335,34 @@ const getOrderByUser = (userId, filter, finding) => {
   });
 };
 
+const updateStatus = async (id, status) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Tìm và cập nhật đơn hàng theo ID
+      const updatedOrder = await Order.findById(id);
+
+      // Nếu không tìm thấy đơn hàng
+      if (!updatedOrder) {
+        resolve({
+          status: "ERR",
+          message: "Đơn hàng không tồn tại!",
+        });
+      }
+
+      updatedOrder.status = status
+      await updatedOrder.save();
+
+      resolve({
+        status: "OK",
+        message: "Đã hoàn thành đơn hàng!",
+        data: updatedOrder
+      });
+    } catch (error) {
+      reject(error);
+    }
+  })
+};
+
 const completeOrder = (orderId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -250,6 +387,8 @@ const completeOrder = (orderId) => {
 
 export {
   createOrder,
+  getAllOrder,
   getOrderByUser,
+  updateStatus,
   completeOrder,
 };
