@@ -3,8 +3,9 @@ import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddl
 import PromotionController from "~/controllers/PromotionController";
 const router = express.Router();
 router.route("/")
-    // .get(authAdminMiddleware, PromotionController.getAllPromotions)
-    .get( PromotionController.getAllPromotions)
+    .get(
+        //authAdminMiddleware, 
+        PromotionController.getAllPromotions)
 
     // .post(authAdminMiddleware, PromotionController.createPromotion)
     .post(authAdminMiddleware, PromotionController.createPromotion) //test

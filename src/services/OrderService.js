@@ -104,7 +104,7 @@ const createOrder = async (data) => {
   }
 };
 
-const getAllOrder = async (page = 1, limit = 10, filters = {}) => {
+const getAllOrder = async (page = 1, limit, filters = {}) => {
   try {
     const skip = (page - 1) * limit;
     let query = {};  // Khởi tạo query rỗng
