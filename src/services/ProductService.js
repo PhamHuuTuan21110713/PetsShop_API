@@ -315,6 +315,9 @@ const getBestSellingProducts = async (page = 1, limit = 10) => {
           price: 1,
           sold: 1,
           rating: 1,
+          desc: 1,
+          quantity: 1,
+          type: 1,
           promotions: 1,  // Trả về thông tin khuyến mãi của sản phẩm
           hasPromotion: 1  // Trả về thông tin về khuyến mãi
         }
