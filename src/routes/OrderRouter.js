@@ -23,7 +23,7 @@ router.get(
 );
 
 router.patch("/update/:id", authAdminMiddleware, OrderController.updateOrder)
-
+router.patch("/:id",authUserMiddleware,OrderController.updateOrderByUser)
 router.patch(
   "/complete/:id",
   // authAdminMiddleware,
