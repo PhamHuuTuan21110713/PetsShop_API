@@ -6,6 +6,7 @@ router.route("/")
     .get(
         //authAdminMiddleware, 
         PromotionController.getAllPromotions)
+
     // .post(authAdminMiddleware, PromotionController.createPromotion)
     .post(authAdminMiddleware, PromotionController.createPromotion) //test
 

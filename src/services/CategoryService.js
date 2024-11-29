@@ -202,6 +202,7 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                         $match: {
                                             $expr: {
                                                 $and: [
+                                                    { $eq: ["$state", true] } ,
                                                     { $in: ["$$productId", "$applicableProducts"] }, // Kiểm tra xem productId có trong applicableProducts
                                                     { $lte: ["$startDate", new Date()] }, // startDate <= ngày hiện tại
                                                     { $gte: ["$endDate", new Date()] } // endDate >= ngày hiện tại

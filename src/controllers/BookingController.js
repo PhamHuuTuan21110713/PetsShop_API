@@ -31,8 +31,23 @@ const createNew = async (req, res) => {
     }
 }
 
+const update = async (req, res) => {
+  
+    try {
+        const data = req.body;
+        const id = req.params.id;
+        console.log("booking id: ", id),
+        console.log("booking data: ", data);
+        const response = await BookingService.update(id,data);
+        if (response) return res.status(200).json(response); 
+    } catch(err) {
+        return res.status(404).json(err);
+    }
+}
+
 export default {
     createNew,
     getAll,
-    getById
+    getById,
+    update
 }
