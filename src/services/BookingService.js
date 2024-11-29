@@ -183,8 +183,32 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
         }
     })
 }
+
+const update = (id,data) => {
+    return new Promise(async (rs, rj) => {
+        try {
+            const booking = await Booking.findByIdAndUpdate(id,data);
+            if(booking) {
+                rs({
+                    status: "OK",
+                    message:"Cập nhật thông tin thành công",
+                    data: booking
+                })
+            } else {
+                rj({
+                    status: "ERR",
+                    message: "Không tìm thấy thông tin"
+                })
+            }
+        }catch(err) {
+            console.log(err);
+            rj(err);
+        }
+    })
+}
 export default {
     getById,
     createNew,
-    getAll
+    getAll,
+    update
 }
