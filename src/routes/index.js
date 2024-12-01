@@ -10,6 +10,8 @@ import ServiceRouter from './ServiceRouter.js';
 import ShopInformationRouter from './ShopInformationRouter.js';
 import BookingRouter from './BookingRouter.js';
 import EmailRouter from './EmailRouter.js';
+import ChatRouter from './ChatRouter.js';
+import MessageRouter from './MessageRouter.js'
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/users", UserRouter);
@@ -22,6 +24,8 @@ const routes = (app) => {
   app.use("/api/shop", ShopInformationRouter);
   app.use("/api/bookings",BookingRouter );
   app.use("/api", EmailRouter);
+  app.use("/api/chats", ChatRouter);
+  app.use("/api/messages", MessageRouter);
 };
 
 export default routes;

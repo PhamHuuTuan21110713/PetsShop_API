@@ -161,6 +161,12 @@ const loginUser = (data) => {
 
 
       }
+      if(user && user.state === 0) {
+        reject({
+          status:"ERR",
+          message:"Tài khoản của bạn đã bị khóa"
+        })
+      }
       const checkPassword = bcrypt.compareSync(password, user.password);
       if (!checkPassword) {
         reject({
