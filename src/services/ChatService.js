@@ -7,8 +7,8 @@ const createChat = (firstId, secondId) => {
                 members: { $all: [firstId, secondId] }
             })
             if (chat) {
-                return rj({
-                    status: "ERR",
+                return rs({
+                    status: "EXIST",
                     message: "Chat đã tồn tại",
                     data: chat
                 })
