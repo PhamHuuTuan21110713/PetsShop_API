@@ -82,7 +82,7 @@ const getOrderByUser = async (req, res) => {
 
 const updateOrderByUser = async (req, res) => {
   // const userId = req.params.id;
-  const { orderId, status } = req.body;
+  const { orderId, status, paymentStatus } = req.body;
   console.log("ỏderid", orderId);
   console.log("status", status);
   try {
@@ -92,7 +92,7 @@ const updateOrderByUser = async (req, res) => {
     }
 
     // Gọi service để cập nhật trạng thái đơn hàng
-    const updatedOrder = await OrderService.updateStatus(orderId, status);
+    const updatedOrder = await OrderService.updateStatus(orderId, status, paymentStatus);
 
     if (!updatedOrder) {
       return res.status(404).json({ message: 'Đơn hàng không tìm thấy' });

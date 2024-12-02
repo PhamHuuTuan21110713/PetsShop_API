@@ -1,7 +1,6 @@
 import Promotion from "~/models/Promotion";
 import mongoose from "mongoose";
 const getAllPromotions = (outdated, condition = {}) => {
-
     return new Promise(async (rs, rj) => {
         try {
             let promotions = null;
@@ -10,28 +9,26 @@ const getAllPromotions = (outdated, condition = {}) => {
             console.log("outdated: ", outdated)
             console.log("date service", outdated);
 
+            // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay (chỉ lấy phần ngày, không tính thời gian)
+            const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+            const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
             // Xử lý `outdated`
             if (outdated === "true") {
-                filters.$or = [
-                    { startDate: { $gt: today } },
-                    { endDate: { $lt: today } }
-                ];
+                // Lọc các khuyến mãi hết hạn: Ngày kết thúc < hôm nay
+                filters.endDate = { $lt: startOfToday };
             } else if (outdated === "false") {
-                filters.$and = [
-                    { startDate: { $lte: today } },
-                    { endDate: { $gte: today } }
-                ]
-                // filters.startDate = { $lte: today };
-                // filters.endDate = { $gte: today };
+
+                // Lọc các khuyến mãi còn hoạt động: Ngày bắt đầu <= hôm nay và Ngày kết thúc >= hôm nay
+                filters.startDate = { $lte: endOfToday };
+                filters.endDate = { $gte: startOfToday };
+
             }
 
             // Thêm các điều kiện từ `condition`
             if (condition.name) filters.name = condition.name;
             if (condition.promotionId) filters._id = condition.promotionId;
             if (condition.type && condition.type !== "none") filters.type = condition.type;
-
-            //filters.state = true;  // Điều kiện luôn có trường `state` là `true`
-
             // Tạo query MongoDB
             promotions = await Promotion.find(filters);
 
