@@ -234,7 +234,14 @@ const getOrderByUser = (userId, filter, finding) => {
         delete _filter.year
       }
 
-
+      console.log("filter: ", _filter)
+      if(_filter._id) {
+        const id = new mongoose.Types.ObjectId(_filter._id)
+        _filter = {
+          ..._filter,
+          _id: id
+        }
+      }
       const orders = await Order.aggregate([
         {
           $match: {

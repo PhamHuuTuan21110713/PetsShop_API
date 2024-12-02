@@ -10,7 +10,7 @@ const getAllPromotions = async (req, res) => {
         if (query.filters) {
             filters = JSON.parse(query.filters);
         }
-
+        console.log("filter: ",filters)
         const { outdated = "none", ...others } = filters;
         console.log("Promotion query: ", outdated);  // Kiểm tra giá trị outdated
         console.log("Promotion other filters: ", others);  // Kiểm tra các giá trị khác trong filters

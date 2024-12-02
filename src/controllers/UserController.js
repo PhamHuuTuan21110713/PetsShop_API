@@ -153,7 +153,7 @@ const updateUser = async (req, res) => {
           message: "THE AUTHORIZATION",
         });
       }
-      // console.log("role: ", user?.role);
+      console.log("role: ", user?.role);
 
       if (user?.role === "user") {
         const response = await UserService.updateUser(userId, data, imageFile, "user");
