@@ -60,7 +60,7 @@ const createOrderAndProcessPayment = async (req, res) => {
         const total = totalAmount / 100;
         const ipAddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const paymentUrl = vnpay.buildPaymentUrl({
-            vnp_Amount: total * 100,
+            vnp_Amount: total * 100 + shippingFee,
             vnp_IpAddr: ipAddr,
             vnp_TxnRef: order._id,
             vnp_OrderInfo: note || 'Thanh toán đơn hàng',
