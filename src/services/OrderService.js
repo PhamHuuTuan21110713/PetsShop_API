@@ -107,7 +107,7 @@ const createOrder = async (data) => {
 const getAllOrder = async (page = 1, limit, filters = {}) => {
   try {
     const skip = (page - 1) * limit;
-    let query = {};  // Khởi tạo query rỗng
+    let query = { state: true };  // Mặc định luôn lọc đơn hàng có state === true
 
     // Kiểm tra và áp dụng từng điều kiện lọc nếu có
     if (filters.status) {
@@ -156,6 +156,7 @@ const getAllOrder = async (page = 1, limit, filters = {}) => {
     throw new Error("Lỗi khi lấy đơn hàng: " + error.message);
   }
 };
+
 
 
 
@@ -335,7 +336,7 @@ const getOrderByUser = (userId, filter, finding) => {
   });
 };
 
-const updateStatus = async (id, status) => {
+const updateStatus = async (id, status, paymentStatus) => {
   return new Promise(async (resolve, reject) => {
     try {
       // Tìm và cập nhật đơn hàng theo ID
@@ -350,6 +351,7 @@ const updateStatus = async (id, status) => {
       }
 
       updatedOrder.status = status
+      updatedOrder.paymentStatus = paymentStatus
       await updatedOrder.save();
 
       resolve({
