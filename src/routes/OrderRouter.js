@@ -18,7 +18,7 @@ router.get("/vnpay-return", paymenController.vnPayReturn)
 router.get("/", authAdminMiddleware, OrderController.getAllOrder)
 router.get(
   "/get-by-user/:id",
-  // authUserMiddleware,
+  authUserMiddleware,
   OrderController.getOrderByUser
 );
 
