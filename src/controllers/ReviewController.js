@@ -2,6 +2,7 @@ import * as ReviewService from '../services/ReviewService';
 
  const createReview = async (req, res) => {
   const newData = req.body;
+console.log("newData", newData);
 
   try {
     const newReview = await ReviewService.createReview(newData);
