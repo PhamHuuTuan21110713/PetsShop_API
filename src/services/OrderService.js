@@ -245,6 +245,7 @@ const getOrderByUser = (userId, filter, finding) => {
       const orders = await Order.aggregate([
         {
           $match: {
+            state: true,
             customerId: userId,
             ..._filter
           }
