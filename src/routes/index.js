@@ -11,7 +11,8 @@ import ShopInformationRouter from './ShopInformationRouter.js';
 import BookingRouter from './BookingRouter.js';
 import EmailRouter from './EmailRouter.js';
 import ChatRouter from './ChatRouter.js';
-import MessageRouter from './MessageRouter.js'
+import MessageRouter from './MessageRouter.js';
+import NotificationRouter from './NotificationRouter.js';
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/users", UserRouter);
@@ -26,6 +27,7 @@ const routes = (app) => {
   app.use("/api", EmailRouter);
   app.use("/api/chats", ChatRouter);
   app.use("/api/messages", MessageRouter);
+  app.use("/api/notifications", NotificationRouter);
 };
 
 export default routes;

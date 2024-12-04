@@ -56,6 +56,11 @@ io.on("connection", (socket) => {
       if(user) {
         console.log(`user get message ${user.userId} `)
         io.to(user.socketId).emit("getMessage", message);
+        io.to(user.socketId).emit("getNotification", {
+          senderId: message.senderId,
+          isReading: false,
+          date: new Date()
+        });
       }
     })
     socket.on("disconnect", () => {
