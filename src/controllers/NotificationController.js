@@ -28,7 +28,12 @@ const findNotification = async (req, res) => {
 
     try {
         const data = req.query;
-        const response = await NotificationService.findNotification(data);
+        
+        let state = true
+        if(data.state !== null && data.state !== undefined) {
+            state = data.state
+        }
+        const response = await NotificationService.findNotification(data,state);
         res.status(200).json(response);
     } catch (err) {
         console.log("notify err", err);

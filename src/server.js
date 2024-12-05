@@ -63,6 +63,13 @@ io.on("connection", (socket) => {
         });
       }
     })
+    socket.on("sendBookingNotify", (bookingNotify) => {
+      const user = onlineUsers.find((onlineuser) => onlineuser.userId === bookingNotify.receiverId);
+      if(user) {
+        console.log(`user ${user.userId} get booking notify`)
+        io.to(user.socketId).emit("getBookingNotify", bookingNotify);
+      }
+    })
     socket.on("disconnect", () => {
       onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
       console.log(`Socket ID${socket.id} has disconnected`)
