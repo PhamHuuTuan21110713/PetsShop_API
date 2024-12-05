@@ -37,12 +37,17 @@ const updateNotification = (id, data) => {
     })
 }
 
-const findNotification = (condition) => {
+const findNotification = (condition,state) => {
     return new Promise(async (rs, rj) => {
         try {
-            let _condition = {};
+            // console.log("mystate: ", state);
+            let _condition = {
+                state: state
+            };
+            
             if (condition) {
                 _condition = {
+                    ..._condition,
                     ...condition
                 }
             }
@@ -56,7 +61,7 @@ const findNotification = (condition) => {
                 }
             }
             console.log("final condition: ", _condition);
-            const notification = await Notification.find(_condition);
+            const notification = await Notification.find(_condition).sort({ createdAt: -1 });
             if (notification) {
                 rs({
                     status: "OK",
