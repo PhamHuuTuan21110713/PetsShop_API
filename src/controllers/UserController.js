@@ -193,34 +193,34 @@ const updateUser = async (req, res) => {
 
     const authorizationHeader = req.headers['authorization'];
     const token = authorizationHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN, async function (err, user) {
-      if (err) {
-        // console.log("ërror: ", err)
-        return res.status(401).json({
-          status: "ERR",
-          message: "THE AUTHORIZATION",
-        });
-      }
-      console.log("role: ", user?.role);
+    const user  = jwt.verify(token, process.env.ACCESS_TOKEN)
+    if (!user) {
+      // console.log("ërror: ", err)
+      return res.status(401).json({
+        status: "ERR",
+        message: "Lỗi xác thực",
+      });
+    }
+    console.log("role: ", user?.role);
 
-      if (user?.role === "user") {
-        const response = await UserService.updateUser(userId, data, imageFile, "user");
-        const refresh_token = response.data.refresh_token;
-        res.cookie('refresh_token', refresh_token, {
-          httpOnly: true,
-          // secure: true,        
-          sameSite: 'Strict',
-          maxAge: 24 * 60 * 60 * 1000
-          // maxAge: 10000  // 
-        })
-        return res.status(200).json(response);
-      } else if (user?.role === "admin") {
-        const response = await UserService.updateUser(userId, data, imageFile, "admin");
-        return res.status(200).json(response);
-      }
-    });
+    if (user?.role === "user") {
+      const response = await UserService.updateUser(userId, data, imageFile, "user");
+      const refresh_token = response.data.refresh_token;
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        // secure: true,        
+        sameSite: 'Strict',
+        maxAge: 24 * 60 * 60 * 1000
+        // maxAge: 10000  // 
+      })
+      return res.status(200).json(response);
+    } else if (user?.role === "admin") {
+      const response = await UserService.updateUser(userId, data, imageFile, "admin");
+      return res.status(200).json(response);
+    }
 
   } catch (error) {
+    console.log("update user err: ", error);
     return res.status(404).json({
       message: error,
     });

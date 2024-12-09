@@ -383,10 +383,17 @@ const updateUser = (userId, data, imageFile, role) => {
     try {
       const { name, email, phone, gender, address, state = 1 } = data;
       const checkUserByPhone = await User.findOne({ phone });
-      if (checkUserByPhone && checkUserByPhone.phone !== phone) {
+      if (checkUserByPhone && checkUserByPhone._id.toString() !== userId) {
         reject({
           status: "ERR",
-          message: "Số điện thoại đã tồn tại!",
+          message: "Không thể cập nhật với số điện thoại này!",
+        });
+      }
+      const checkUserByEmail = await User.findOne({ email });
+      if(checkUserByEmail && checkUserByEmail._id.toString() !== userId) {
+        reject({
+          status: "ERR",
+          message: "Bạn không thể cập nhật với email này!",
         });
       }
       const user = await User.findById(userId);
@@ -459,6 +466,7 @@ const updateUser = (userId, data, imageFile, role) => {
         cloudinary.uploader.destroy(imageFile.filename);
         console.log("deleting prev avatar when error")
       }
+
       reject(error);
     }
   });
