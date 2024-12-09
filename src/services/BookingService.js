@@ -40,7 +40,7 @@ const createNew = (data) => {
     })
 }
 
-const getAll = (userId, filter, finding, sorting,page,limit) => {
+const getAll = (userId, filter, finding, sorting, page, limit) => {
 
     return new Promise(async (rs, rj) => {
         try {
@@ -49,15 +49,15 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
                 bookingDate: -1 // Sắp xếp giảm dần theo bookingDate
             };
             let _page = null; let _limit = null;
-            if(page){
+            if (page) {
                 _page = parseInt(page)
             }
-            if(limit) {
+            if (limit) {
                 _limit = parseInt(limit);
             }
             if (sorting) {
                 const _sort = JSON.parse(sorting)
-                _sorting = {..._sort}; 
+                _sorting = { ..._sort };
             }
             console.log("filter: ", _filter);
             if (_filter.year) {
@@ -78,12 +78,22 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
             if (userId !== "") {
                 const _userId = new mongoose.Types.ObjectId(userId);
                 if (finding !== "") {
-                    const _finding = new mongoose.Types.ObjectId(finding);
-                    condition = {
-                        ..._filter,
-                        userId: _userId,
-                        _id: _finding
+                    const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+                    if (isValidObjectId(finding)) {
+                        const _finding = new mongoose.Types.ObjectId(finding);
+                        condition = {
+                            ..._filter,
+                            userId: _userId,
+                            _id: _finding
+                        }
+                    } else {
+                        rs({
+                            status: "OK",
+                            message: "Chuỗi id tìm kiếm không hợp lệ",
+                            data: []
+                        })
                     }
+
                 } else {
                     condition = {
                         ..._filter,
@@ -93,10 +103,19 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
 
             } else {
                 if (finding !== "") {
-                    const _finding = new mongoose.Types.ObjectId(finding);
-                    condition = {
-                        ..._filter,
-                        _id: _finding
+                    const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+                    if (isValidObjectId(finding)) {
+                        const _finding = new mongoose.Types.ObjectId(finding);
+                        condition = {
+                            ..._filter,
+                            _id: _finding
+                        }
+                    } else {
+                        rs({
+                            status: "OK",
+                            message: "Chuỗi id tìm kiếm không hợp lệ",
+                            data: []
+                        })
                     }
                 } else {
                     condition = {
@@ -105,7 +124,7 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
                 }
             }
             let { serviceId } = _filter;
-            if(serviceId) {
+            if (serviceId) {
                 // console.log("serviceid: ", serviceId);
                 const reId = new mongoose.Types.ObjectId(serviceId);
                 condition = {
@@ -133,33 +152,33 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
                 {
                     $sort: _sorting
                 }
-                
+
             ]
-            if( _page && _limit) {
+            if (_page && _limit) {
                 pepline.push(
-                {
-                    $skip: (_page - 1) * _limit // Bỏ qua các bản ghi của các trang trước
-                },
-                {
-                    $limit: _limit // Lấy số lượng bản ghi cho trang hiện tại
-                })
+                    {
+                        $skip: (_page - 1) * _limit // Bỏ qua các bản ghi của các trang trước
+                    },
+                    {
+                        $limit: _limit // Lấy số lượng bản ghi cho trang hiện tại
+                    })
             }
             let totalCount = 0;
             let totalPages = 1;
-            if(_page && _limit) {
+            if (_page && _limit) {
                 const totalDocs = await Booking.aggregate([
                     { $match: condition },
                     { $count: "total" } // Đếm tổng số document khớp với điều kiện
                 ]);
-                
+
                 // Lấy số lượng document (nếu không có document, mặc định là 0)
                 totalCount = totalDocs.length > 0 ? totalDocs[0].total : 0;
                 totalPages = _limit ? Math.ceil(totalCount / _limit) : 1;
             }
-             
+
             const data = await Booking.aggregate(pepline)
             if (data) {
-                if(_limit && _page) {
+                if (_limit && _page) {
                     rs({
                         status: "OK",
                         message: "Lấy danh sách đơn dịch vụ thành công",
@@ -175,7 +194,7 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
                         data
                     })
                 }
-               
+
             }
         } catch (err) {
             console.log("ERR:", err)
@@ -184,14 +203,14 @@ const getAll = (userId, filter, finding, sorting,page,limit) => {
     })
 }
 
-const update = (id,data) => {
+const update = (id, data) => {
     return new Promise(async (rs, rj) => {
         try {
-            const booking = await Booking.findByIdAndUpdate(id,data);
-            if(booking) {
+            const booking = await Booking.findByIdAndUpdate(id, data);
+            if (booking) {
                 rs({
                     status: "OK",
-                    message:"Cập nhật thông tin thành công",
+                    message: "Cập nhật thông tin thành công",
                     data: booking
                 })
             } else {
@@ -200,7 +219,7 @@ const update = (id,data) => {
                     message: "Không tìm thấy thông tin"
                 })
             }
-        }catch(err) {
+        } catch (err) {
             console.log(err);
             rj(err);
         }
