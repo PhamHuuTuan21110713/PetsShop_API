@@ -29,8 +29,6 @@ const sendPIN = async (email) => {
     }catch(err) {
         return err
     }
-    
-  
 }
 
 const checkPIN = (email, pin) => {
