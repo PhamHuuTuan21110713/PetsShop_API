@@ -11,7 +11,8 @@ import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from "cloudinary";
 import JWTService from './JWTService';
 import nodemailer from 'nodemailer';
-
+import dotenv from "dotenv";
+dotenv.config();
 const createMany = (data) => {
   return new Promise(async (rs, rj) => {
     try {
@@ -148,6 +149,113 @@ const createUser = (data) => {
   });
 };
 
+const registerUser = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { name, email, password, address, phone, gender } = data;
+
+      // Kiểm tra email và phone đã có trong hệ thống chưa
+      const checkUserByEmail = await User.findOne({ email });
+      const checkUserByPhone = await User.findOne({ phone });
+
+      if (checkUserByEmail) {
+        reject({
+          status: "ERR",
+          message: "Email đã được sử dụng, vui lòng dùng email khác!",
+        });
+      } else if (checkUserByPhone) {
+        reject({
+          status: "ERR",
+          message: "Số điện thoại đã được sử dụng, vui lòng dùng số khác!",
+        });
+      } else {
+        // Mã hóa mật khẩu
+        const hashPassword = bcrypt.hashSync(password, 12);
+
+        // Tạo người dùng mới với tất cả các trường, bao gồm gender
+        const newUser = await User.create({
+          name,
+          email,
+          password: hashPassword,
+          address,
+          shippingAddress: [
+            {
+              recipientName: name,
+              recipientPhone: phone,
+              address,
+              isDefault: true,
+            }
+          ],
+          phone,
+          gender,  // Thêm gender vào
+          cart: [],
+          state: 0
+        });
+
+        // Tạo access token và refresh token
+        const access_token = await JWTService.generateAccessToken({
+          id: newUser._id,
+          isAdmin: newUser.isAdmin,
+          email: newUser.email,
+          name: newUser.name,
+        });
+
+        // Trả về thông tin người dùng và token
+        if (newUser) {
+          const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for port 465, false for other ports
+            auth: {
+              user: process.env.EMAIL_SENDER,
+              pass: process.env.PASSWORD_EMAIL_SENDER,
+            },
+          });
+          const mailOptions = {
+            from: 'no-reply@Betshob@gmail.com.com',
+            to: email,
+            subject: 'Xác nhận email đăng ký tài khoản',
+            html: `
+                <p>Chào bạn,</p>
+                <p>Hãy nhấn vào nút dưới đây để xác nhận email và kích hoạt tài khoản:</p>
+                <a href="http://localhost:8080/api/verify-email?token=${access_token}" 
+                   style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+                   Xác nhận tài khoản
+                </a>
+                <p>Nếu bạn không yêu cầu tạo tài khoản, vui lòng bỏ qua email này.</p>
+            `
+          };
+          await transporter.sendMail(mailOptions);
+          resolve({
+            status: "OK",
+            message: "Tạo tài khoản thành công!",
+            data: {
+              access_token,
+              user: {
+                _id: newUser._id,
+                isAdmin: newUser.isAdmin,
+                name: newUser.name,
+                email: newUser.email,
+                address: newUser.address,
+                shippingAddress: newUser.shippingAddress,
+                avatar: newUser.avatar,
+                phone: newUser.phone,
+                gender: newUser.gender,  // Thêm gender vào response
+                cart: newUser.cart,
+                createdAt: newUser.createdAt,
+                updatedAt: newUser.updatedAt,
+                state: newUser.state,
+              },
+            },
+          });
+        }
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 const loginUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -161,10 +269,10 @@ const loginUser = (data) => {
 
 
       }
-      if(user && user.state === 0) {
+      if (user && user.state === 0) {
         reject({
-          status:"ERR",
-          message:"Tài khoản của bạn đã bị khóa"
+          status: "ERR",
+          message: "Tài khoản của bạn đã bị khóa"
         })
       }
       const checkPassword = bcrypt.compareSync(password, user.password);
@@ -275,10 +383,17 @@ const updateUser = (userId, data, imageFile, role) => {
     try {
       const { name, email, phone, gender, address, state = 1 } = data;
       const checkUserByPhone = await User.findOne({ phone });
-      if (checkUserByPhone && checkUserByPhone.phone !== phone) {
+      if (checkUserByPhone && checkUserByPhone._id.toString() !== userId) {
         reject({
           status: "ERR",
-          message: "Số điện thoại đã tồn tại!",
+          message: "Không thể cập nhật với số điện thoại này!",
+        });
+      }
+      const checkUserByEmail = await User.findOne({ email });
+      if(checkUserByEmail && checkUserByEmail._id.toString() !== userId) {
+        reject({
+          status: "ERR",
+          message: "Bạn không thể cập nhật với email này!",
         });
       }
       const user = await User.findById(userId);
@@ -351,6 +466,7 @@ const updateUser = (userId, data, imageFile, role) => {
         cloudinary.uploader.destroy(imageFile.filename);
         console.log("deleting prev avatar when error")
       }
+
       reject(error);
     }
   });
@@ -1044,5 +1160,6 @@ export {
   resetPassword,
   sendMessage,
   updateShippingAddress,
-  checkPassword
+  checkPassword,
+  registerUser
 };

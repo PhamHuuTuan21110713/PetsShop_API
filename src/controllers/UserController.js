@@ -10,6 +10,54 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "~/models/UserModel";
 dotenv.config();
+
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, password, confirmPassword, address, phone } =
+      req.body;
+    const checkEmail = String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !address ||
+      !phone
+    ) {
+      res.status(500).json({
+        status: "ERR",
+        message: "Các trường không được để trống!",
+      });
+    } else if (!checkEmail) {
+      res.status(500).json({
+        status: "ERR",
+        message: "Email không đúng định dạng!",
+      });
+    } else if (password !== confirmPassword) {
+      res.status(500).json({
+        status: "ERR",
+        message: "Mật khẩu nhập lại không khớp!",
+      });
+    } else {
+      // const imageFile = req.file;
+      const response = await UserService.registerUser(req.body);
+      return res.status(200).json(response);
+    }
+  } catch (error) {
+    // const imageFile = req.file;
+    // if (imageFile) cloudinary.uploader.destroy(imageFile.filename);
+    // console.log("err here")
+    // console.log(error);
+    return res.status(404).json({
+      message: error,
+    });
+  }
+}
+
 const createUser = async (req, res) => {
   try {
     const { name, email, password, confirmPassword, address, phone } =
@@ -64,7 +112,7 @@ const createMany = async (req, res) => {
     console.log("body: ", data)
     const response = await UserService.createMany(data);
     return res.status(201).json(response);
-  }catch(err) {
+  } catch (err) {
     return res.status(404).json(err);
   }
 }
@@ -145,34 +193,34 @@ const updateUser = async (req, res) => {
 
     const authorizationHeader = req.headers['authorization'];
     const token = authorizationHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN, async function (err, user) {
-      if (err) {
-        // console.log("ërror: ", err)
-        return res.status(401).json({
-          status: "ERR",
-          message: "THE AUTHORIZATION",
-        });
-      }
-      console.log("role: ", user?.role);
+    const user  = jwt.verify(token, process.env.ACCESS_TOKEN)
+    if (!user) {
+      // console.log("ërror: ", err)
+      return res.status(401).json({
+        status: "ERR",
+        message: "Lỗi xác thực",
+      });
+    }
+    console.log("role: ", user?.role);
 
-      if (user?.role === "user") {
-        const response = await UserService.updateUser(userId, data, imageFile, "user");
-        const refresh_token = response.data.refresh_token;
-        res.cookie('refresh_token', refresh_token, {
-          httpOnly: true,
-          // secure: true,        
-          sameSite: 'Strict',
-          maxAge: 24 * 60 * 60 * 1000
-          // maxAge: 10000  // 
-        })
-        return res.status(200).json(response);
-      } else if (user?.role === "admin") {
-        const response = await UserService.updateUser(userId, data, imageFile, "admin");
-        return res.status(200).json(response);
-      }
-    });
+    if (user?.role === "user") {
+      const response = await UserService.updateUser(userId, data, imageFile, "user");
+      const refresh_token = response.data.refresh_token;
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        // secure: true,        
+        sameSite: 'Strict',
+        maxAge: 24 * 60 * 60 * 1000
+        // maxAge: 10000  // 
+      })
+      return res.status(200).json(response);
+    } else if (user?.role === "admin") {
+      const response = await UserService.updateUser(userId, data, imageFile, "admin");
+      return res.status(200).json(response);
+    }
 
   } catch (error) {
+    console.log("update user err: ", error);
     return res.status(404).json({
       message: error,
     });
@@ -406,5 +454,6 @@ export {
   sendMessage,
   logout,
   updateShippingAddress,
-  checkPassword
+  checkPassword,
+  registerUser
 };
