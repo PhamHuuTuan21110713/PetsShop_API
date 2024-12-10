@@ -36,18 +36,8 @@ const createOrder = async (req, res) => {
 const getAllOrder = async (req, res) => {
   const { page = 1, limit = 10, filters } = req.query;  // Lấy filters từ query
 
-  // Kiểm tra và chuyển filters thành object nếu có
-  let parsedFilters = {};
-  if (filters) {
-    try {
-      parsedFilters = JSON.parse(filters);  // Chuyển filters từ chuỗi JSON sang object
-    } catch (error) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "Filters không hợp lệ"
-      });
-    }
-  }
+    const  parsedFilters = JSON.parse(filters);  // Chuyển filters từ chuỗi JSON sang object
+    
 
   try {
     // Gọi service để lấy kết quả

@@ -132,6 +132,10 @@ const getAllOrder = async (page = 1, limit, filters = {}) => {
       query._id = filters.orderId;
     }
 
+    if(filters.name){
+      query.name = filters.name
+    }
+
     // Truy vấn database với điều kiện query đã tạo
     const orders = await Order.find(query)
       .skip(skip)
