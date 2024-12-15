@@ -66,7 +66,7 @@ const addThumbnail = (productId, imageFile) => {
     try {
       const product = await Product.findById(productId);
       console.log("san pham them anh: ", product);
-      
+
       if (product) {
         const imgUrl = imageFile?.path;
         const imgPath = imageFile?.filename;
@@ -111,7 +111,7 @@ const addThumbnail = (productId, imageFile) => {
 // ) => {
 //   return new Promise(async (resolve, reject) => {
 //     console.log("ProductId in service:", productId); // Kiểm tra giá trị của productId
-    
+
 //     try {
 //       const filter = {};
 
@@ -120,7 +120,7 @@ const addThumbnail = (productId, imageFile) => {
 //         filter._id = productId; // Lọc theo _id nếu productId có giá trị
 //       } else {
 //         // Nếu productId không có, áp dụng các điều kiện lọc khác
-        
+
 //         // Lọc theo giá
 //         filter.price = { $gte: price_min, $lte: price_max };
 
@@ -187,7 +187,7 @@ const getProducts = (
 ) => {
   return new Promise(async (resolve, reject) => {
     console.log("ProductId in service:", productId); // Kiểm tra giá trị của productId
-    
+
     try {
       const filter = {};
 
@@ -399,7 +399,7 @@ const getBestSellingProducts = async (page = 1, limit = 10) => {
 
 const getProductById = async (productId) => {
   console.log('Received productId:', productId);  // Kiểm tra giá trị productId đã nhận
-  
+
   try {
     // Chuyển đổi productId từ chuỗi (string) thành ObjectId
     const productObjectId = new mongoose.Types.ObjectId(productId);
@@ -523,8 +523,8 @@ const updateProduct = (data, productId, imageFile) => {
         var imageID = product.imgPath;
         if (imageID) cloudinary.uploader.destroy(imageID);
       }
-        const updatedProduct = await Product.findByIdAndUpdate(productId, newData, { new: true });
-       
+      const updatedProduct = await Product.findByIdAndUpdate(productId, newData, { new: true });
+
 
       resolve({
         status: "OK",
@@ -566,6 +566,37 @@ const deleteProduct = (productId) => {
   });
 };
 
+const createMany = (data) => {
+  return new Promise(async (rs, rj) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+
+      const users = await Product.insertMany(data, { session });
+      await session.commitTransaction();
+      if (users.length === data.length) {
+        rs({
+          status: "OK",
+          message: "Tất cả dữ liệu đã được thêm vào",
+          data: users
+        })
+      } else if (users.length > 0) {
+        rj({
+          status: "ERR",
+          message: "Có dữ liệu lỗi, không thể thêm",
+          data: users
+        })
+      }
+    } catch (err) {
+      console.log(err);
+      await session.abortTransaction();
+      rj(err);
+    } finally {
+      session.endSession();
+    }
+  })
+}
+
 export {
   createProduct,
   addThumbnail,
@@ -574,4 +605,5 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
+  createMany
 };

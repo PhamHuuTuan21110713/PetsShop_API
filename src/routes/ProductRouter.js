@@ -15,6 +15,7 @@ router.post(
   uploadProductCloud.single("image"),
   ProductController.createProduct
 );
+router.post("/create-many", authAdminMiddleware, ProductController.createMany)
 router.patch(
   "/add-thumbnail/:id",
   authAdminMiddleware,
