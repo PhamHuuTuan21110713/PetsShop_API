@@ -25,7 +25,7 @@ const createProduct = async (req, res) => {
 //   try {
 //     const id = req.params.id;
 //     console.log("Có id trong controller", id);
-    
+
 //     // Kiểm tra nếu ObjectId không hợp lệ
 //     if (!mongoose.Types.ObjectId.isValid(id)) {
 //       return res.status(400).json({
@@ -133,8 +133,8 @@ const getBestSellingProducts = async (req, res) => {
 
 
 const getProductById = async (req, res) => {
-  const  productId  = req.params.id;
-  
+  const productId = req.params.id;
+
   try {
     const result = await ProductService.getProductById(productId);  // Gọi service để lấy sản phẩm
     if (result.status === "OK") {
@@ -166,7 +166,7 @@ const updateProduct = async (req, res) => {
 
     const response = await ProductService.updateProduct(req.body, productId, imageFile);
     return res.status(200).json(response);
-    
+
   } catch (error) {
     console.error(error);  // In lỗi ra để debug
     return res.status(500).json({
@@ -189,6 +189,17 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const createMany = async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("body: ", data)
+    const response = await ProductService.createMany(data);
+    return res.status(201).json(response);
+  } catch (err) {
+    return res.status(404).json(err);
+  }
+}
+
 export {
   createProduct,
   addThumbnail,
@@ -197,4 +208,5 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
+  createMany
 };

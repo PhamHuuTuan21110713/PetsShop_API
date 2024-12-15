@@ -10,9 +10,12 @@ const getAllPromotions = (outdated, condition = {}) => {
             console.log("date service", outdated);
 
             // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay (chỉ lấy phần ngày, không tính thời gian)
-            const startOfToday = new Date(today.setHours(0, 0, 0, 0));
-            const endOfToday = new Date(today.setHours(23, 59, 59, 999));
-
+            // const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+            // const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+            const startOfToday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 0, 0, 0, 0));
+            const endOfToday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59, 999));
+            console.log("start of today: ", startOfToday);
+            console.log("end of today: ", endOfToday);
             // Xử lý `outdated`
             if (outdated === "true") {
                 // Lọc các khuyến mãi hết hạn: Ngày kết thúc < hôm nay
@@ -20,6 +23,9 @@ const getAllPromotions = (outdated, condition = {}) => {
             } else if (outdated === "false") {
 
                 // Lọc các khuyến mãi còn hoạt động: Ngày bắt đầu <= hôm nay và Ngày kết thúc >= hôm nay
+                filters.state = true;
+                // filters.startDate = { $lte: startOfToday };
+                // filters.endDate = { $gte: endOfToday };
                 filters.startDate = { $lte: endOfToday };
                 filters.endDate = { $gte: startOfToday };
 

@@ -32,7 +32,7 @@ const createMany = (data) => {
           cart: [],
         }
       })
-      const users = await User.insertMany(newData, { ordered: false });
+      const users = await User.insertMany(newData, { ordered: true });
       if (users.length === data.length) {
         rs({
           status: "OK",
@@ -40,9 +40,9 @@ const createMany = (data) => {
           data: users
         })
       } else if (users.length > 0) {
-        rs({
-          status: "OK",
-          message: "Thêm thành công, nhưng không thêm được toàn bộ",
+        rj({
+          status: "ERR",
+          message: "Có nội dung lỗi, không thể thêm",
           data: users
         })
       }
