@@ -27,6 +27,7 @@ const sendPIN = async (email) => {
         console.log("sendedEmail")
         return info;
     }catch(err) {
+        console.log("error send email: ", err);
         return err
     }
 }
