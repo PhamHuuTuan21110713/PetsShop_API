@@ -13,11 +13,14 @@ import * as UserController from "~/controllers/UserController";
 import { uploadUserCloud } from "~/middlewares/uploadFileMiddleware";
 import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
 
+
 router.route('/')
 
   .get(authAdminMiddleware, UserController.getAllUser)
   .post(authAdminMiddleware, UserController.createMany)
 // .get( UserController.getAllUser)
+router.route("/get-by-email/:email")
+  .get( UserController.getByEmail)
 
 router.route('/:id')
   .get(authUserMiddleware, UserController.getUserById)
@@ -25,6 +28,7 @@ router.route('/:id')
   .delete(authAdminMiddleware, UserController.deleteUser)
   .patch(authUserMiddleware, uploadUserCloud.single("avatar"), UserController.updateUser)
 
+router.post("/forget-password/:id", UserController.forgotPassword);
 router.route('/shipping-address/:id')
   .patch(authUserMiddleware, UserController.updateShippingAddress)
 router.post("/check-password/:id",authUserMiddleware, UserController.checkPassword)

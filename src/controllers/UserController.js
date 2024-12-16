@@ -174,6 +174,24 @@ const getAllUser = async (req, res) => {
   }
 };
 
+const getByEmail = async (req, res) => {
+  try {
+  
+    const { email } = req.params;
+    if(!email || email === ""){
+      return res.status(404).json({
+        stauts: "ERR",
+        message: "Không có dữ liệu email để tìm"
+      })
+    } 
+    const response = await UserService.getByEmail(email);
+    return res.status(200).json(response);
+  } catch (error) {
+    
+    return res.status(404).json(error);
+  }
+}
+
 const getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -193,7 +211,7 @@ const updateUser = async (req, res) => {
 
     const authorizationHeader = req.headers['authorization'];
     const token = authorizationHeader.split(' ')[1];
-    const user  = jwt.verify(token, process.env.ACCESS_TOKEN)
+    const user = jwt.verify(token, process.env.ACCESS_TOKEN)
     if (!user) {
       // console.log("ërror: ", err)
       return res.status(401).json({
@@ -352,10 +370,9 @@ const clearCart = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    const agent = useragent.parse(req.headers["user-agent"]);
-    const operating_system = agent.os.toString();
-    const response = await UserService.forgotPassword(email, operating_system);
+    const { password } = req.body;
+    const id = req.params.id;
+    const response = await UserService.forgotPassword(id, password);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -455,5 +472,6 @@ export {
   logout,
   updateShippingAddress,
   checkPassword,
-  registerUser
+  registerUser,
+  getByEmail
 };
