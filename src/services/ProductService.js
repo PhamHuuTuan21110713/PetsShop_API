@@ -4,6 +4,7 @@ import Product from "~/models/ProductModel";
 import Promotion from "~/models/Promotion";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
+import Type from "~/models/TypeProductModel";
 
 const createProduct = (data, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -597,6 +598,21 @@ const createMany = (data) => {
   })
 }
 
+const getTypeProduct = async () => {
+  try{
+    const type = await Type.find();
+    return {
+      status: "OK",
+      message: "Lấy type thành công",
+      data: {type}
+    }
+  }
+
+  catch(err){
+    throw new Error(`Lỗi khi lấy type: ${err.message}`)
+  }
+}
+
 export {
   createProduct,
   addThumbnail,
@@ -605,5 +621,6 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
-  createMany
+  createMany,
+  getTypeProduct
 };

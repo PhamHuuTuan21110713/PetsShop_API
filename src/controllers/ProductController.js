@@ -200,6 +200,15 @@ const createMany = async (req, res) => {
   }
 }
 
+const getTypeProduct = async (req, res) => {
+  try{
+    const response = await ProductService.getTypeProduct();
+    res.status(200).json(response)
+  } catch(error){
+    res.status(500).json({status: "ERROR", message: "Lỗi khi lấy danh sách type"})
+  }
+} 
+
 export {
   createProduct,
   addThumbnail,
@@ -208,5 +217,6 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
-  createMany
+  createMany,
+  getTypeProduct
 };
