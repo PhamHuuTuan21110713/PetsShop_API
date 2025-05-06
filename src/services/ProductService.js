@@ -271,7 +271,8 @@ const getProducts = (
             img: 1,
             categoryId: 1,
             promotions: 1,
-            hasPromotion: 1
+            hasPromotion: 1,
+            createdAt: 1
           }
         }
       ];
