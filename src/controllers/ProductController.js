@@ -2,7 +2,12 @@
 import * as ProductService from "~/services/ProductService";
 const createProduct = async (req, res) => {
   try {
-    const { name, desc, type, price, categoryId } = req.body;
+    const { name, desc, type, price, categoryId, quantity, sold, view, rating } = req.body;
+    const typeArray = type.split(",");
+
+    console.log("type nafy moi", typeof type);
+    const newData = { name, desc, type: typeArray, price, categoryId, quantity, sold, view, rating }
+
     if (!name || !desc || !type || !price || !categoryId) {
       return res.status(200).json({
         status: "ERR",
@@ -10,7 +15,7 @@ const createProduct = async (req, res) => {
       });
     }
     const imageFile = req.file;
-    const response = await ProductService.createProduct(req.body, imageFile);
+    const response = await ProductService.createProduct(newData, imageFile);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -152,7 +157,10 @@ const updateProduct = async (req, res) => {
   try {
     const imageFile = req.file;
     const { name, desc, type, price, state } = req.body;
+    const typeArray = type.split(",");
 
+    console.log("type nafy moi", typeof type);
+    const newData = { name, desc, type: typeArray, price, state }
     // Kiểm tra xem có thay đổi nào hay không
     if (!name && !desc && !type && !price && !state && !imageFile) {
       return res.status(400).json({
@@ -164,7 +172,7 @@ const updateProduct = async (req, res) => {
     const productId = req.params.id;
     console.log("Product ID:", productId);  // Để kiểm tra ID có đúng không
 
-    const response = await ProductService.updateProduct(req.body, productId, imageFile);
+    const response = await ProductService.updateProduct(newData, productId, imageFile);
     return res.status(200).json(response);
 
   } catch (error) {
