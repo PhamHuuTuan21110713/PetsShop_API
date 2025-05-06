@@ -156,11 +156,11 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const imageFile = req.file;
-    const { name, desc, type, price, state } = req.body;
+    const { name, desc, type, price, state , quantity} = req.body;
     const typeArray = type.split(",");
 
     console.log("type nafy moi", typeof type);
-    const newData = { name, desc, type: typeArray, price, state }
+    const newData = { name, desc, type: typeArray, price, state, quantity }
     // Kiểm tra xem có thay đổi nào hay không
     if (!name && !desc && !type && !price && !state && !imageFile) {
       return res.status(400).json({
