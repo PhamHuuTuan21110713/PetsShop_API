@@ -1,4 +1,4 @@
-import Message from "~/models/MessageModel";
+import Message from "../models/MessageModel.js";
 
 const createMessage = (data) => {
     return new Promise(async (rs,rj) => {

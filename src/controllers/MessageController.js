@@ -1,4 +1,4 @@
-import MessageService from "~/services/MessageService";
+import MessageService from "../services/MessageService.js";
 const createMessage = async (req, res) => {
     try {
         const { chatId, senderId, text } = req.body;

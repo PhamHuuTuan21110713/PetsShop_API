@@ -1,9 +1,9 @@
 import express from "express";
 const router = express.Router();
 
-import { loginUser, createUser, refreshToken, logout, registerUser } from "~/controllers/UserController";
-import { uploadUserCloud } from "~/middlewares/uploadFileMiddleware";
-import JWTService from "~/services/JWTService";
+import { loginUser, createUser, refreshToken, logout, registerUser } from "../controllers/UserController.js";
+// import { uploadUserCloud } from "~/middlewares/uploadFileMiddleware";
+import JWTService from "../services/JWTService.js";
 
 router.post("/login", loginUser);
 // router.post("/register", uploadUserCloud.single("avatar"), createUser);

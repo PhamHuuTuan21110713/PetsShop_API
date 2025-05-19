@@ -1,4 +1,4 @@
-import ChatService from "~/services/ChatService";
+import ChatService from "../services/ChatService.js";
 
 const createChat = async (req, res) => {
     try {

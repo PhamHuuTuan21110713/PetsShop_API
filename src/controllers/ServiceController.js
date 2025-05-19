@@ -1,4 +1,4 @@
-import ServiceService from "~/services/ServiceService";
+import ServiceService from "../services/ServiceService.js";
 
 const createService = async (req, res) => {
     const data = req.body;

@@ -1,10 +1,10 @@
 // const Product = require("../models/ProductModel");
 // const cloudinary = require("cloudinary").v2;
-import Product from "~/models/ProductModel";
-import Promotion from "~/models/Promotion";
+import Product from "../models/ProductModel.js";
+// import Promotion from "~/models/Promotion";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
-import Type from "~/models/TypeProductModel";
+import Type from "../models/TypeProductModel.js";
 
 const createProduct = (data, imageFile) => {
   return new Promise(async (resolve, reject) => {

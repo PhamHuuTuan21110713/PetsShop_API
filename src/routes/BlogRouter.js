@@ -1,8 +1,8 @@
 import express from "express";
 const router = express.Router();
-import * as BlogController from "~/controllers/BlogController";
-import { authAdminMiddleware } from "~/middlewares/authMiddleware";
-import { uploadBlogCloud } from "~/middlewares/uploadFileMiddleware";
+import * as BlogController from "../controllers/BlogController.js";
+import { authAdminMiddleware } from "../middlewares/authMiddleware.js";
+import { uploadBlogCloud } from "../middlewares/uploadFileMiddleware.js";
 
 
 router.route('/')

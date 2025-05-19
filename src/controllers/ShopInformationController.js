@@ -1,4 +1,4 @@
-import ShopInformationService from "~/services/ShopInformationService";
+import ShopInformationService from "../services/ShopInformationService.js";
 
 const getInformationById = async (req, res) => {
     const id = req.params.id

@@ -1,9 +1,7 @@
-// const Order = require("../models/OrderModel");
-// const { DateTime } = require("luxon");
 
-import Order from "~/models/OrderModel";
-import User from "~/models/UserModel";
-import Product from "~/models/ProductModel";
+import Order from "../models/OrderModel.js";
+import User from "../models/UserModel.js";
+import Product from "../models/ProductModel.js";
 import { DateTime } from "luxon";
 import mongoose from "mongoose";
 

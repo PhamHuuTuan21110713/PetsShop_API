@@ -1,4 +1,4 @@
-import Notification from "~/models/NotificationModel"
+import Notification from "../models/NotificationModel.js"
 const createNotification = (data) => {
     return new Promise(async (rs, rj) => {
         try {

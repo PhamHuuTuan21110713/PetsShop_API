@@ -1,4 +1,4 @@
-import CategoryService from "~/services/CategoryService";
+import CategoryService from "../services/CategoryService.js";
 
 const getAllCategories = async (req, res) => {
     try {

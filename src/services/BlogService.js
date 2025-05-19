@@ -1,4 +1,4 @@
-import Blog from "~/models/BlogModel";
+import Blog from "../models/BlogModel.js";
 import { v2 as cloudinary } from "cloudinary";
 
 const createBlog = async (title, contents, imageFile) => {
@@ -133,4 +133,4 @@ const deleteBlog = async (id) => {
   }
 }
 
-module.exports = { createBlog, getBlogById, getBlogs, updateBlog, deleteBlog };
+export default { createBlog, getBlogById, getBlogs, updateBlog, deleteBlog };

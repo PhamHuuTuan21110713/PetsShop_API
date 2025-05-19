@@ -1,4 +1,4 @@
-import BlogService from "~/services/BlogService";
+import BlogService from "../services/BlogService.js";
 
 const addBlog = async (req, res) => {
   const title = req.body.title;

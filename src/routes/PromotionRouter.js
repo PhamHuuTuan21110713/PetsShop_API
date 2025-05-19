@@ -1,6 +1,6 @@
 import express from "express";
-import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
-import PromotionController from "~/controllers/PromotionController";
+import { authAdminMiddleware } from "../middlewares/authMiddleware.js";
+import PromotionController from "../controllers/PromotionController.js";
 const router = express.Router();
 router.route("/")
     .get(

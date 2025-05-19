@@ -1,17 +1,12 @@
-// const User = require("../models/UserModel");
-// const Order = require("../models/OrderModel");
-// const bcrypt = require("bcrypt");
-// const cloudinary = require("cloudinary").v2;
-// const JWTService = require("./JWTService");
-// const nodemailer = require("nodemailer");
-// const jwt = require("jsonwebtoken");
-import User from '~/models/UserModel';
-import Order from '~/models/OrderModel';
+
+import User from '../models/UserModel.js';
+import Order from '../models/OrderModel.js';
 import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from "cloudinary";
-import JWTService from './JWTService';
+import JWTService from './JWTService.js';
 import nodemailer from 'nodemailer';
 import dotenv from "dotenv";
+import Preference from '../models/PreferenceModel.js';
 dotenv.config();
 const createMany = (data) => {
   return new Promise(async (rs, rj) => {
@@ -360,8 +355,8 @@ const getAllUser = (paging, sorting, find, condition) => {
 const getByEmail = (email) => {
   return new Promise(async (rs, rj) => {
     try {
-      const user = await User.findOne({email: email});
-      if(user && user.state === 1) {
+      const user = await User.findOne({ email: email });
+      if (user && user.state === 1) {
         rs({
           status: "OK",
           message: "Lấy dữ liệu thành công",
@@ -382,7 +377,7 @@ const getByEmail = (email) => {
           message: "Không tìm thấy tài khoản"
         })
       }
-    }catch (err) {
+    } catch (err) {
       rj(err);
     }
   })
@@ -421,7 +416,7 @@ const updateUser = (userId, data, imageFile, role) => {
         });
       }
       const checkUserByEmail = await User.findOne({ email });
-      if(checkUserByEmail && checkUserByEmail._id.toString() !== userId) {
+      if (checkUserByEmail && checkUserByEmail._id.toString() !== userId) {
         reject({
           status: "ERR",
           message: "Bạn không thể cập nhật với email này!",
@@ -857,18 +852,18 @@ const clearCart = (userId) => {
 const forgotPassword = (userId, password) => {
   return new Promise(async (rs, rj) => {
     try {
-        const hashPassword = bcrypt.hashSync(password, 12);
-        const user = await User.findByIdAndUpdate(userId, {password: hashPassword});
-        if(!user) {
-          return rj({
-            status: "ERR",
-            message: "Không tìm thấy người dùng khớp"
-          })
-        }
-        rs({
-          status: "OK",
-          message:'Cập nhật mật khẩu thành công'
+      const hashPassword = bcrypt.hashSync(password, 12);
+      const user = await User.findByIdAndUpdate(userId, { password: hashPassword });
+      if (!user) {
+        return rj({
+          status: "ERR",
+          message: "Không tìm thấy người dùng khớp"
         })
+      }
+      rs({
+        status: "OK",
+        message: 'Cập nhật mật khẩu thành công'
+      })
     } catch (error) {
       rj(error);
     }
@@ -1083,6 +1078,30 @@ const sendMessage = (data) => {
   });
 };
 
+const updateView = (userId, productId) => {
+  return new Promise(async (rs, rj) => {
+    try {
+      const user = await Preference.findOne({
+         userId: userId 
+      })
+      if(!user) {
+        await Preference.create({
+          userId,
+          prefres: [
+            {
+              productId,
+              accessDate: Date.now()
+            }
+          ],
+          views: []
+        })
+      }
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+
 export {
   createMany,
   createUser,
@@ -1102,5 +1121,6 @@ export {
   updateShippingAddress,
   checkPassword,
   registerUser,
-  getByEmail
+  getByEmail,
+  updateView
 };

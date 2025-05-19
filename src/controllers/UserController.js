@@ -2,13 +2,13 @@
 // const JWTService = require("../services/JWTService");
 // const cloudinary = require("cloudinary").v2;
 // const useragent = require("useragent");
-import * as UserService from "~/services/UserService";
-import JWTService from "~/services/JWTService";
-import { v2 as cloudinary } from "cloudinary";
+import * as UserService from "../services/UserService.js";
+import JWTService from "../services/JWTService.js";
+// import { v2 as cloudinary } from "cloudinary";
 import useragent from "useragent";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import User from "~/models/UserModel";
+// import User from "~/models/UserModel.js";
 dotenv.config();
 
 const registerUser = async (req, res) => {
@@ -176,18 +176,18 @@ const getAllUser = async (req, res) => {
 
 const getByEmail = async (req, res) => {
   try {
-  
+
     const { email } = req.params;
-    if(!email || email === ""){
+    if (!email || email === "") {
       return res.status(404).json({
         stauts: "ERR",
         message: "Không có dữ liệu email để tìm"
       })
-    } 
+    }
     const response = await UserService.getByEmail(email);
     return res.status(200).json(response);
   } catch (error) {
-    
+
     return res.status(404).json(error);
   }
 }
@@ -452,6 +452,17 @@ const logout = async (req, res) => {
   });
 };
 
+const updateView = async (req, res) => {
+  const userId = req.params.id;
+  const productId = req.body.productId;
+  try {
+    const response = await UserService.updateView(userId, productId);
+    res.status(200).json(response);
+  } catch (err) {
+    return res.status(404).json(err);
+  }
+}
+
 export {
   createUser,
   createMany,
@@ -473,5 +484,6 @@ export {
   updateShippingAddress,
   checkPassword,
   registerUser,
-  getByEmail
+  getByEmail,
+  updateView
 };

@@ -1,4 +1,4 @@
-import ShopInformation from "~/models/ShopInformationModel";
+import ShopInformation from "../models/ShopInformationModel.js";
 
 const getInformationById = (id) => {
     return new Promise(async (rs, rj) => {

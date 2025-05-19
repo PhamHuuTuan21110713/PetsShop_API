@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Booking from "~/models/BookingModel";
+import Booking from "../models/BookingModel.js";
 
 const getById = (id) => {
     return new Promise(async (rs, rj) => {

@@ -1,5 +1,5 @@
-import EmailService from "~/services/EmailService";
-import User from "~/models/UserModel";
+import EmailService from "../services/EmailService.js";
+import User from "../models/UserModel.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";

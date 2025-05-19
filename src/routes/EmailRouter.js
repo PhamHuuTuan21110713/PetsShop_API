@@ -1,5 +1,5 @@
-import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
-import EmailController from "~/controllers/EmailController";
+import { authUserMiddleware } from "../middlewares/authMiddleware.js";
+import EmailController from "../controllers/EmailController.js";
 import express from "express";
 const router = express.Router();
 

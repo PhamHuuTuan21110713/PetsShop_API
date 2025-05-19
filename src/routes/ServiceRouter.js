@@ -1,6 +1,6 @@
 import express from "express";
-import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
-import ServiceController from "~/controllers/ServiceController";
+import { authAdminMiddleware } from "../middlewares/authMiddleware.js";
+import ServiceController from "../controllers/ServiceController.js";
 const router = express.Router();
 
 router.route("/")
