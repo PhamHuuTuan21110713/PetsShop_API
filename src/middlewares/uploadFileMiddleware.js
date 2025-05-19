@@ -29,7 +29,16 @@ const productStorage = new CloudinaryStorage({
   },
 });
 
+const blogStorage = new CloudinaryStorage({
+  cloudinary,
+  allowedFormats: ["jpg", "png", "jpeg"],
+  params: {
+    folder: "petsshop/blogs",
+  },
+});
+
 const uploadUserCloud = multer({ storage: userStorage });
 const uploadProductCloud = multer({ storage: productStorage });
+const uploadBlogCloud = multer({ storage: blogStorage });
 
-export { uploadUserCloud, uploadProductCloud };
+export { uploadUserCloud, uploadProductCloud, uploadBlogCloud };

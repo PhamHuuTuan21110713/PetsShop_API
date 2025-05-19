@@ -1,6 +1,7 @@
 
 import ReviewRouter from './ReviewRouter.js';
 import ProductRouter from "./ProductRouter.js";
+import BlogRouter from "./BlogRouter.js";
 import UserRouter from "./UserRouter.js";
 import OrderRouter from "./OrderRouter.js";
 import AuthenRouter from './AuthenRouter.js';
@@ -16,6 +17,7 @@ import NotificationRouter from './NotificationRouter.js';
 import RecommendRouter from './RecommendRouter.js'
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
+  app.use("/api/blogs", BlogRouter);
   app.use("/api/users", UserRouter);
   app.use("/api/order", OrderRouter);
   app.use("/api/review", ReviewRouter);
