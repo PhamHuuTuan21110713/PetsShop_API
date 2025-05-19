@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import PromotionService from "~/services/PromotionService";
+import PromotionService from "../services/PromotionService.js";
 
 const getAllPromotions = async (req, res) => {
     try {

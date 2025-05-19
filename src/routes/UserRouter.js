@@ -1,17 +1,9 @@
-// const express = require("express");
-// const router = express.Router();
-// const UserController = require("../controllers/UserController");
-// const { uploadUserCloud } = require("../middlewares/uploadFileMiddleware");
-// const {
-//   authUserMiddleware,
-//   authAdminMiddleware,
-// } = require("../middlewares/authMiddleware");
 
 import express from "express";
 const router = express.Router();
-import * as UserController from "~/controllers/UserController";
-import { uploadUserCloud } from "~/middlewares/uploadFileMiddleware";
-import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
+import * as UserController from "../controllers/UserController.js";
+import { uploadUserCloud } from "../middlewares/uploadFileMiddleware.js";
+import { authUserMiddleware, authAdminMiddleware } from "../middlewares/authMiddleware.js";
 
 
 router.route('/')
@@ -27,6 +19,7 @@ router.route('/:id')
   // .get(UserController.getUserById)
   .delete(authAdminMiddleware, UserController.deleteUser)
   .patch(authUserMiddleware, uploadUserCloud.single("avatar"), UserController.updateUser)
+  
 
 router.post("/forget-password/:id", UserController.forgotPassword);
 router.route('/shipping-address/:id')
@@ -42,6 +35,6 @@ router.patch("/update-cart/:id", authUserMiddleware, UserController.updateCart);
 router.patch("/remove-from-cart/:id", authUserMiddleware, UserController.removeFromCart);
 router.patch("/clear-cart/:id", authUserMiddleware, UserController.clearCart);
 router.post("/payment/:id", authUserMiddleware, UserController.payment);
-
+router.post("/update-view/:id", UserController.updateView)
 
 export default router;

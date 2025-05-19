@@ -1,9 +1,9 @@
 
 import ReviewRouter from './ReviewRouter.js';
-import ProductRouter from "./ProductRouter";
-import UserRouter from "./UserRouter";
-import OrderRouter from "./OrderRouter";
-import AuthenRouter from './AuthenRouter';
+import ProductRouter from "./ProductRouter.js";
+import UserRouter from "./UserRouter.js";
+import OrderRouter from "./OrderRouter.js";
+import AuthenRouter from './AuthenRouter.js';
 import CategoryRouter from './CategoryRouter.js'
 import PromotionRouter from './PromotionRouter.js';
 import ServiceRouter from './ServiceRouter.js';
@@ -13,6 +13,7 @@ import EmailRouter from './EmailRouter.js';
 import ChatRouter from './ChatRouter.js';
 import MessageRouter from './MessageRouter.js';
 import NotificationRouter from './NotificationRouter.js';
+import RecommendRouter from './RecommendRouter.js'
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/users", UserRouter);
@@ -28,6 +29,7 @@ const routes = (app) => {
   app.use("/api/chats", ChatRouter);
   app.use("/api/messages", MessageRouter);
   app.use("/api/notifications", NotificationRouter);
+  app.use("/api/recommends", RecommendRouter );
 };
 
 export default routes;

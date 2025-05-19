@@ -1,4 +1,4 @@
-import Promotion from "~/models/Promotion";
+import Promotion from "../models/Promotion.js";
 import mongoose from "mongoose";
 const getAllPromotions = (outdated, condition = {}) => {
     return new Promise(async (rs, rj) => {

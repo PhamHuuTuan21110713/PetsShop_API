@@ -5,9 +5,9 @@
 // const { authAdminMiddleware } = require("../middlewares/authMiddleware");
 import express from "express";
 const router = express.Router();
-import * as ProductController from "~/controllers/ProductController";
-import { uploadProductCloud } from "~/middlewares/uploadFileMiddleware";
-import { authAdminMiddleware } from "~/middlewares/authMiddleware";
+import * as ProductController from "../controllers/ProductController.js";
+import { uploadProductCloud } from "../middlewares/uploadFileMiddleware.js";
+import { authAdminMiddleware } from "../middlewares/authMiddleware.js";
 
 router.post(
   "/",

@@ -1,6 +1,5 @@
 import express from "express";
-import { authUserMiddleware, authAdminMiddleware } from "~/middlewares/authMiddleware";
-import ShopInformationController from "~/controllers/ShopInformationController";
+import ShopInformationController from "../controllers/ShopInformationController.js";
 const router = express.Router();
 
 router.route("/:id")

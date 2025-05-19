@@ -1,4 +1,4 @@
-import Service from "~/models/ServiceModel";
+import Service from "../models/ServiceModel.js";
 import mongoose from "mongoose";
 const getServiceById = (id) => {
     const idobj = new mongoose.Types.ObjectId(id);

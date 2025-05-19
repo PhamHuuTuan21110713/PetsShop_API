@@ -1,4 +1,4 @@
-import BookingService from "~/services/BookingService";
+import BookingService from "../services/BookingService.js";
 
 const getById = async (req, res) => {
     const id = req.params.id;

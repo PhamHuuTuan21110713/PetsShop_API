@@ -1,8 +1,6 @@
-import Category from "~/models/CategoryModel"
-import { slugify } from "~/utils/formatters";
+import Category from "../models/CategoryModel.js"
+import { slugify } from "../utils/formatters.js";
 import mongoose from "mongoose";
-import Product from "~/models/ProductModel";
-import Promotion from "~/models/Promotion";
 const getAllCategories = () => {
     return new Promise(async (rs, rj) => {
         try {

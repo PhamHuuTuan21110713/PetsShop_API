@@ -1,4 +1,4 @@
-import Chat from "~/models/ChatModel";
+import Chat from "../models/ChatModel.js";
 
 const createChat = (firstId, secondId) => {
     return new Promise(async (rs, rj) => {

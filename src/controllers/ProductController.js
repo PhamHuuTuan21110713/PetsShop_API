@@ -1,5 +1,5 @@
 // const ProductService = require("../services/ProductService");
-import * as ProductService from "~/services/ProductService";
+import * as ProductService from "../services/ProductService.js";
 const createProduct = async (req, res) => {
   try {
     const { name, desc, type, price, categoryId } = req.body;

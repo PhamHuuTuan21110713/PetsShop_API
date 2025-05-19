@@ -3,9 +3,9 @@
 // const OrderController = require("../controllers/OrderController");
 import express from "express";
 const router = express.Router();
-import * as OrderController from "~/controllers/OrderController";
-import { authAdminMiddleware, authUserMiddleware } from "../middlewares/authMiddleware";
-import * as paymenController from "~/controllers/paymentController"
+import * as OrderController from "../controllers/OrderController.js";
+import { authAdminMiddleware, authUserMiddleware } from "../middlewares/authMiddleware.js";
+import * as paymenController from "../controllers/paymentController.js"
 
 
 router.post("/create",

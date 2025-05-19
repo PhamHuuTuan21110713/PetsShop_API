@@ -1,4 +1,4 @@
-import * as ReviewService from '../services/ReviewService';
+import * as ReviewService from '../services/ReviewService.js';
 
  const createReview = async (req, res) => {
   const newData = req.body;
