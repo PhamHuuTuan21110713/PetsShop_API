@@ -7,4 +7,9 @@ router.route("/:id")
     .get(authUserMiddleware,RecommendController.get)
     // .get(RecommendController.get)
 
+router.route("/:id")
+    .patch(authUserMiddleware,RecommendController.update)
+
+router.route("/:id/check-like")
+    .patch(authUserMiddleware,RecommendController.checkLiked)
 export default router;

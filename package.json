@@ -28,7 +28,8 @@
     "nodemailer": "^6.9.13",
     "socket.io": "^4.8.1",
     "useragent": "^2.3.0",
-    "vnpay": "^1.6.0"
+    "vnpay": "^1.6.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.9",
