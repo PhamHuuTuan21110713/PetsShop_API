@@ -12,6 +12,31 @@ const get = async (req, res) => {
     }
 }
 
+const update = async (req, res) => {
+    const userId = req.params.id;
+    const { productId, information } = req.body
+    if (!productId) res.status(400).json({ status: "ERR", message: "ProductId is required!" })
+    try {
+        const response = await RecommendService.update(userId, productId, information);
+        return res.status(200).json(response);
+    } catch (err) {
+        return res.status(404).json(err);
+    }
+}
+
+const checkLiked = async (req, res) => {
+    const userId = req.params.id;
+    const { productId } = req.body
+    try {
+        const response = await RecommendService.checkLiked(userId, productId);
+        return res.status(200).json(response);
+    } catch (err) {
+        return res.status(404).json(err);
+    }
+}
+
 export {
-    get
+    get,
+    update,
+    checkLiked
 }
