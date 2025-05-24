@@ -15,7 +15,7 @@ const createNewCategory = async (req, res) => {
         const response = await CategoryService.createNewCategory(data);
         return res.status(201).json(response);
     } catch (err) {
-        
+
         return res.stauts(404).json(err)
     }
 }
@@ -28,20 +28,20 @@ const getCategoryById = async (req, res) => {
     console.log("limit: ", limit)
     console.log("filter: ", filters);
     console.log("sort: ", sort)
-    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice =Number.MAX_SAFE_INTEGER, onlyPromotion = false} = filters;
-    let sorting = {sold: -1}
-    if(sort === "sold") {
-        sorting = {sold: -1}
+    const { minStar = 0, maxStar = 5, minPrice = 0, maxPrice = Number.MAX_SAFE_INTEGER, onlyPromotion = false } = filters;
+    let sorting = { sold: -1 }
+    if (sort === "sold") {
+        sorting = { sold: -1 }
     } else if (sort === "date") {
-        sorting = {updatedAt: -1}
+        sorting = { updatedAt: -1 }
     } else if (sort === "price-up") {
-        sorting = {price: 1}
+        sorting = { price: 1 }
     } else if (sort === "price-down") {
-        sorting = {price: -1}
+        sorting = { price: -1 }
     }
     console.log("promotion: ", onlyPromotion)
     try {
-        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice,onlyPromotion: JSON.parse(onlyPromotion) }, { page, limit }, sorting)
+        const response = await CategoryService.getCategoryById(id, { minStar, maxStar, minPrice, maxPrice, onlyPromotion: JSON.parse(onlyPromotion) }, { page, limit }, sorting)
         // console.log("page: ",page)
         // console.log("limit: ",limit)
         // console.log("filters: ",filters)
@@ -52,8 +52,25 @@ const getCategoryById = async (req, res) => {
     }
 }
 
+const getCategorySales = async (req, res) => {
+    try {
+        const filters = req.query;
+        //const filters = { month, quarter, year };
+       // console.log("Filter category: ", filters.year);
+
+        const data = await CategoryService.getCategorySales(filters)
+        console.log("data tra ve: ", data)
+        res.status(200).json(data)
+    }
+    catch (error) {
+        console.error("Error in getCategorySales:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 export default {
     getAllCategories,
     createNewCategory,
-    getCategoryById
+    getCategoryById,
+    getCategorySales
 }
