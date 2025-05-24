@@ -1,4 +1,7 @@
 import Category from "../models/CategoryModel.js"
+import Product from "../models/ProductModel.js";
+import Order from "../models/OrderModel.js";
+import dayjs from "dayjs";
 import { slugify } from "../utils/formatters.js";
 import mongoose from "mongoose";
 const getAllCategories = () => {
@@ -414,8 +417,61 @@ const createNewCategory = (data) => {
     })
 }
 
+const getCategorySales = async (filters) => {
+  try {
+    const { year, month, quarter } = filters;
+
+    //console.log("filter", year);
+    
+    const orders = await Order.find({});
+    const filteredOrders = orders.filter(order => {
+      const date = dayjs(order.orderDate);
+      return (!month || date.month() + 1 === parseInt(month)) &&
+             (!quarter || Math.ceil((date.month() + 1) / 3) === parseInt(quarter)) &&
+             (!year || date.year() === parseInt(year));
+    });
+
+    const products = await Product.find({});
+    const categories = await Category.find({});
+
+    const result = categories.map(category => {
+      const categoryProducts = products.filter(p => p.categoryId === category._id.toString());
+      let quantitySold = 0;
+      let revenue = 0;
+
+      for (const order of filteredOrders) {
+        for (const item of order.products) {
+          const product = categoryProducts.find(p => p._id.toString() === item.productId);
+          if (product) {
+            quantitySold += item.quantity;
+            revenue += item.quantity * product.price;
+          }
+        }
+      }
+
+      return {
+        category: category.name,
+        quantitySold,
+        revenue,
+      };
+    });
+
+    return {
+      status: "OK",
+      message: "Lấy thống kê doanh số theo danh mục thành công",
+      data: result,
+    };
+  } catch (error) {
+    // Bắt lỗi, có thể log hoặc trả về lỗi cụ thể
+    console.error("Error in getCategorySales:", error);
+    throw error;  // hoặc return một object lỗi
+  }
+};
+
+
 export default {
     getAllCategories,
     createNewCategory,
-    getCategoryById
+    getCategoryById,
+    getCategorySales
 }
