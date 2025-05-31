@@ -190,7 +190,7 @@ const registerUser = (data) => {
         // Tạo access token và refresh token
         const access_token = await JWTService.generateAccessToken({
           id: newUser._id,
-          isAdmin: newUser.isAdmin,
+          role: newUser.role,
           email: newUser.email,
           name: newUser.name,
         });
@@ -268,6 +268,12 @@ const loginUser = (data) => {
         reject({
           status: "ERR",
           message: "Tài khoản của bạn đã bị khóa"
+        })
+      }
+      if(user && user.googleId) {
+         reject({
+          status: "ERR",
+          message: "Email này được dùng cho phương thức khác"
         })
       }
       const checkPassword = bcrypt.compareSync(password, user.password);
