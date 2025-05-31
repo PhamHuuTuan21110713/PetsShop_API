@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    googleId: {type: String, required: false, unique: true},
     avatar: {
       preview: {
         type: String,
@@ -17,20 +18,20 @@ const userSchema = new mongoose.Schema(
       }
     },
     // username: {type: String, required: true},
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     role: { type: String, required: false, default: "user", enum: ["user", "admin"] },
-    gender: { type: String, required: true, enum: ["male", "female", "other"] },
-    address: { type: String, required: true },
+    gender: { type: String, required: false, enum: ["male", "female", "other"] },
+    address: { type: String, required: false },
     shippingAddress: [
       {
-        recipientName: {type: String, required: true},
-        recipientPhone: {type: String, required: true},
-        address: { type: String, required: true },
-        isDefault: { type: Boolean, required: true },
+        recipientName: {type: String, required: false},
+        recipientPhone: {type: String, required: false},
+        address: { type: String, required: false },
+        isDefault: { type: Boolean, required: false },
         note: { type: String, required: false, default: '' }
       }
     ],
-    phone: { type: String, required: true, unique: true, maxlength: 10, minlength: 10 },
+    phone: { type: String, required: false, unique: true, maxlength: 10, minlength: 10 },
     cart: [
       {
         productId: {

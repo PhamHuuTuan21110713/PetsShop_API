@@ -15,6 +15,7 @@ import ChatRouter from './ChatRouter.js';
 import MessageRouter from './MessageRouter.js';
 import NotificationRouter from './NotificationRouter.js';
 import RecommendRouter from './RecommendRouter.js'
+import GoogleAuthRouter from "./GoogleAuthRouter.js"
 const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/blogs", BlogRouter);
@@ -32,6 +33,7 @@ const routes = (app) => {
   app.use("/api/messages", MessageRouter);
   app.use("/api/notifications", NotificationRouter);
   app.use("/api/recommends", RecommendRouter );
+  app.use("/auth/google", GoogleAuthRouter)
 };
 
 export default routes;

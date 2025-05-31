@@ -1,4 +1,3 @@
-
 import express from 'express';
 import dotenv from 'dotenv';
 import routes from './routes/index.js';
@@ -8,9 +7,24 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { createServer } from "http";
 import { Server } from "socket.io";
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(',') || [];
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 dotenv.config();
 
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(',') || [];
+
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:8080/auth/google/callback",
+  passReqToCallback: true
+},
+  function (request, accessToken, refreshToken, profile, done) {
+
+    return done(null, profile);
+  }
+));
 
 const app = express();
 const port = process.env.port || 5000;
@@ -26,6 +40,7 @@ app.use(cookieParser());
 
 routes(app);
 
+
 // EXPRESS + SOCKET
 const httpServer = createServer(app);
 
@@ -40,40 +55,40 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
-    console.log("new socket connection: ", socket.id)
-    
-    socket.on("addNewUser", (userId) => {
-      !onlineUsers.some(user => user.userId === userId) &&
+  console.log("new socket connection: ", socket.id)
+
+  socket.on("addNewUser", (userId) => {
+    !onlineUsers.some(user => user.userId === userId) &&
       onlineUsers.push({
         userId,
         socketId: socket.id
       })
-      console.log("online users: ", onlineUsers);
-    })
+    console.log("online users: ", onlineUsers);
+  })
 
-    socket.on("sendMessage", (message) => {
-      const user = onlineUsers.find((onlineuser) => onlineuser.userId === message.recipientId);
-      if(user) {
-        console.log(`user get message ${user.userId} `)
-        io.to(user.socketId).emit("getMessage", message);
-        io.to(user.socketId).emit("getNotification", {
-          senderId: message.senderId,
-          isReading: false,
-          date: new Date()
-        });
-      }
-    })
-    socket.on("sendBookingNotify", (bookingNotify) => {
-      const user = onlineUsers.find((onlineuser) => onlineuser.userId === bookingNotify.receiverId);
-      if(user) {
-        console.log(`user ${user.userId} get booking notify`)
-        io.to(user.socketId).emit("getBookingNotify", bookingNotify);
-      }
-    })
-    socket.on("disconnect", () => {
-      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-      console.log(`Socket ID${socket.id} has disconnected`)
-    })
+  socket.on("sendMessage", (message) => {
+    const user = onlineUsers.find((onlineuser) => onlineuser.userId === message.recipientId);
+    if (user) {
+      console.log(`user get message ${user.userId} `)
+      io.to(user.socketId).emit("getMessage", message);
+      io.to(user.socketId).emit("getNotification", {
+        senderId: message.senderId,
+        isReading: false,
+        date: new Date()
+      });
+    }
+  })
+  socket.on("sendBookingNotify", (bookingNotify) => {
+    const user = onlineUsers.find((onlineuser) => onlineuser.userId === bookingNotify.receiverId);
+    if (user) {
+      console.log(`user ${user.userId} get booking notify`)
+      io.to(user.socketId).emit("getBookingNotify", bookingNotify);
+    }
+  })
+  socket.on("disconnect", () => {
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+    console.log(`Socket ID${socket.id} has disconnected`)
+  })
 })
 
 mongoose
@@ -85,9 +100,9 @@ mongoose
     console.log(err);
   });
 
-httpServer.listen(port,() => {
-    console.log("Server is running on port ", port);
-  });
+httpServer.listen(port, () => {
+  console.log("Server is running on port ", port);
+});
 
 // app.listen(port, () => {
 //   console.log("Server is running on port ", port);
