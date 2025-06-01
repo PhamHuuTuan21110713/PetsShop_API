@@ -17,8 +17,14 @@ const loginOauth = async (req, res) => {
             // maxAge: 10000  // 
 
         })
+        res.cookie('access_token', access_token, {
+            httpOnly: false,  // cho phép frontend JS truy cập
+            sameSite: 'Strict',
+            maxAge: 60 * 60 * 1000 // access_token thường thời gian ngắn hơn refresh_token
+        });
         // return res.status(200).json(response);
-        return res.redirect(`${process.env.CLIENT_URL}?token=${access_token}`);
+        // return res.redirect(`${process.env.CLIENT_URL}?token=${access_token}`);
+        return res.redirect(`${process.env.CLIENT_URL}`);
     } catch (err) {
         return res.status(500).json(err);
     }

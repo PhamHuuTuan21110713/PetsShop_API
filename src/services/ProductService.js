@@ -5,6 +5,7 @@ import Product from "../models/ProductModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import Type from "../models/TypeProductModel.js";
+import GerminiService from "./GerminiService.js";
 
 const createProduct = (data, imageFile) => {
   return new Promise(async (resolve, reject) => {
@@ -208,7 +209,13 @@ const getProducts = (
 
         // Lọc theo tên (sử dụng RegExp để tìm kiếm không phân biệt hoa/thường)
         if (name) {
-          filter.name = { $regex: new RegExp(name, "i") };
+          const finded_name = await GerminiService.findRelatedName(name);
+          // console.log("germini result: ", result)
+          // filter.name = { $regex: new RegExp(name, "i") };
+          filter.$or = [
+            { name: { $regex: new RegExp(name, "i") } },         // lọc theo tên người dùng nhập
+            { name: { $regex: new RegExp(finded_name, "i") } },  // lọc theo tên sửa bởi Gemini
+          ];
         }
 
         // Lọc theo type (nếu có type)
@@ -600,16 +607,16 @@ const createMany = (data) => {
 }
 
 const getTypeProduct = async () => {
-  try{
+  try {
     const type = await Type.find();
     return {
       status: "OK",
       message: "Lấy type thành công",
-      data: {type}
+      data: { type }
     }
   }
 
-  catch(err){
+  catch (err) {
     throw new Error(`Lỗi khi lấy type: ${err.message}`)
   }
 }
