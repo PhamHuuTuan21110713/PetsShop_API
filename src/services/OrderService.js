@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 import mongoose from "mongoose";
 
 const createOrder = async (data) => {
-  const { customerId, products, totalAmount, shippingFee, note, paymentMethod, address } = data;
+  const { customerId, products, totalAmount, shippingFee, note, paymentMethod, address, phone } = data;
 
   const session = await mongoose.startSession();  // Khởi tạo phiên giao dịch (transaction)
   session.startTransaction();
@@ -39,7 +39,7 @@ const createOrder = async (data) => {
     // Tiến hành tạo đơn hàng
     const orderDate = DateTime.local().toISO();
     const deliveryDate = DateTime.fromISO(orderDate).plus({ minutes: 30 }).toISO();
-    const { name, phone } = user;
+    const { name } = user;
 
     const newOrder = await Order.create(
       [{
