@@ -32,9 +32,9 @@ const createOrderAndProcessPayment = async (req, res) => {
 
         // Tạo orderId và thời gian hết hạn thanh toán
         let date = new Date();
-        let createDate = dateFormat(date, 'yyyymmddmmHHss');
-        let exDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);  // Hết hạn trong 1 ngày
-        let expireDate = dateFormat(exDate, 'yyyymmddHHmmss');
+        let createDate = dateFormat(date, 'yyyymmddHHMMss');
+        let exDate = new Date(date.getTime() + 10 * 60 * 1000);  // Hết hạn trong 1 ngày
+        let expireDate = dateFormat(exDate, 'yyyymmddHHMMss');
 
         // Tạo đơn hàng
         const order = await Order.create({
@@ -102,7 +102,7 @@ const vnPayReturn = async (req, res) => {
         const order = await Order.findOne({ _id: verify.vnp_TxnRef });
         console.log("Id cua don hang", verify.vnp_TxnRef);
         console.log("Id cua don hang dbms", order._id);
-        
+
         console.log("Vai ca order", order);
 
 
@@ -115,7 +115,7 @@ const vnPayReturn = async (req, res) => {
 
 
         //Cập nhật paymentStatus dựa trên isSuccess từ VNPay
-        order.paymentStatus = verify.isSuccess === true ? 'success' : 'failed'; 
+        order.paymentStatus = verify.isSuccess === true ? 'success' : 'failed';
         order.state = verify.isSuccess === true ? true : false
 
         const updatedOrder = await order.save();
@@ -129,7 +129,7 @@ const vnPayReturn = async (req, res) => {
         //     { new: true } // Đảm bảo trả về tài liệu đã cập nhật
         // );
         // console.log('Updated Order:', updatedOrder);
-        
+
 
         // Chuyển hướng sau khi xử lý
         if (verify.isSuccess === true) {
