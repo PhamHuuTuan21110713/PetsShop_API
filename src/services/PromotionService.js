@@ -37,7 +37,7 @@ const getAllPromotions = (outdated, condition = {}) => {
             if (condition.type && condition.type !== "none") filters.type = condition.type;
             // Tạo query MongoDB
             promotions = await Promotion.find(filters);
-
+            console.log("promotions: ", promotions)
             if (promotions) {
                 rs({
                     status: "OK",
