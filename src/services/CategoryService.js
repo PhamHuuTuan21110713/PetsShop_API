@@ -426,7 +426,7 @@ const getCategorySales = async (filters) => {
     const orders = await Order.find({});
     const filteredOrders = orders.filter(order => {
       const date = dayjs(order.orderDate);
-      return (!month || date.month() + 1 === parseInt(month)) &&
+      return order.status === 'tc' && (!month || date.month() + 1 === parseInt(month)) &&
              (!quarter || Math.ceil((date.month() + 1) / 3) === parseInt(quarter)) &&
              (!year || date.year() === parseInt(year));
     });
