@@ -126,14 +126,14 @@ const getBestSellingProducts = async (req, res) => {
   }
 
   try {
-    // Gọi đến ProductService để lấy sản phẩm bán chạy nhất
     const result = await ProductService.getBestSellingProducts(page, parsedLimit);
-    res.json(result);  // Trả về kết quả dưới dạng JSON
+    console.log("lllllllllllllll: ", result)
+    res.json(result);
   } catch (error) {
-    // Xử lý lỗi và trả về thông báo lỗi cho client
-    console.error('Error fetching best selling products:', error);  // Log lỗi chi tiết
+    console.error('Error fetching best selling products:', error);
     res.status(500).json({ message: "Lỗi trong việc lấy sản phẩm", error: error.message });
   }
+
 };
 
 
@@ -156,7 +156,7 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const imageFile = req.file;
-    const { name, desc, type, price, state , quantity} = req.body;
+    const { name, desc, type, price, state, quantity } = req.body;
     const typeArray = type.split(",");
 
     console.log("type nafy moi", typeof type);
@@ -209,13 +209,13 @@ const createMany = async (req, res) => {
 }
 
 const getTypeProduct = async (req, res) => {
-  try{
+  try {
     const response = await ProductService.getTypeProduct();
     res.status(200).json(response)
-  } catch(error){
-    res.status(500).json({status: "ERROR", message: "Lỗi khi lấy danh sách type"})
+  } catch (error) {
+    res.status(500).json({ status: "ERROR", message: "Lỗi khi lấy danh sách type" })
   }
-} 
+}
 
 export {
   createProduct,

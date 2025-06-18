@@ -5,6 +5,7 @@ import Product from "../models/ProductModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import Type from "../models/TypeProductModel.js";
+import Order from "../models/OrderModel.js";
 import GerminiService from "./GerminiService.js";
 
 const createProduct = (data, imageFile) => {
@@ -99,81 +100,6 @@ const addThumbnail = (productId, imageFile) => {
   });
 };
 
-// const getProducts = (
-//   limit,
-//   page,
-//   sort_by,
-//   order,
-//   price_min,
-//   price_max,
-//   rating_filter,
-//   name,
-//   type,
-//   productId // Thêm tham số id
-// ) => {
-//   return new Promise(async (resolve, reject) => {
-//     console.log("ProductId in service:", productId); // Kiểm tra giá trị của productId
-
-//     try {
-//       const filter = {};
-
-//       // Thêm điều kiện lọc theo productId nếu có
-//       if (productId && productId.trim() !== "") { // Kiểm tra nếu productId không phải là chuỗi rỗng
-//         filter._id = productId; // Lọc theo _id nếu productId có giá trị
-//       } else {
-//         // Nếu productId không có, áp dụng các điều kiện lọc khác
-
-//         // Lọc theo giá
-//         filter.price = { $gte: price_min, $lte: price_max };
-
-//         // Lọc theo rating
-//         filter.rating = { $gte: rating_filter };
-
-//         // Lọc theo tên (sử dụng RegExp để tìm kiếm không phân biệt hoa/thường)
-//         if (name) {
-//           filter.name = { $regex: new RegExp(name, "i") };
-//         }
-
-//         // Lọc theo type (nếu có type)
-//         if (type) {
-//           filter.type = type;
-//         } else {
-//           filter.type = { $exists: true }; // Nếu không có type thì tìm tất cả sản phẩm có type
-//         }
-//       }
-
-//       const counter = await Product.countDocuments(filter); // Đếm số sản phẩm thỏa mãn filter
-
-//       let products;
-//       if (sort_by && order) {
-//         const sortOrder = order === "desc" ? -1 : 1;
-//         products = await Product.find(filter)
-//           .sort({ [sort_by]: sortOrder })
-//           .limit(limit)
-//           .skip(limit * (page - 1));
-//       } else {
-//         products = await Product.find(filter)
-//           .limit(limit)
-//           .skip(limit * (page - 1));
-//       }
-
-//       if (products) {
-//         resolve({
-//           status: "OK",
-//           message: "Lấy danh sách sản phẩm thành công!",
-//           data: {
-//             products,
-//             currentPage: Number(page),
-//             totalPage: Math.ceil(counter / limit),
-//             totalProduct: counter,
-//           },
-//         });
-//       }
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
 
 const getProducts = (
   limit,
@@ -306,105 +232,116 @@ const getProducts = (
   });
 };
 
+
 const getBestSellingProducts = async (page = 1, limit = 10) => {
-  let isOnlyPromotion = false; // Biến này có thể được thay đổi nếu muốn chỉ lấy sản phẩm có khuyến mãi
-  try {
-    const skip = (page - 1) * limit;  // Tính toán số sản phẩm bỏ qua (cho phân trang)
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const skip = (page - 1) * limit;
 
-    // Kiểm tra limit và page để đảm bảo chúng hợp lệ
-    if (isNaN(limit) || limit <= 0 || isNaN(page) || page <= 0) {
-      throw new Error("Invalid page or limit");
-    }
-
-    // Tạo pipeline aggregate cho MongoDB
-    const pipeline = [
-      {
-        $match: {
-          sold: { $gt: 20 },  // Lọc sản phẩm có số lượng bán > 20
-          state: true,  // Lọc sản phẩm đang hoạt động
-        }
-      },
-      {
-        $lookup: {
-          from: 'promotions',  // Kết nối với collection 'promotions'
-          let: { productId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $in: ["$$productId", "$applicableProducts"] },  // Sản phẩm có trong danh sách áp dụng khuyến mãi
-                    { $lte: ["$startDate", new Date()] },  // Khuyến mãi đang diễn ra
-                    { $gte: ["$endDate", new Date()] }   // Khuyến mãi chưa kết thúc
-                  ]
-                }
+  const pipeline = [
+    // Chỉ lấy đơn hàng hoàn tất trong tháng hiện tại
+    {
+      $match: {
+        orderDate: { $gte: firstDay, $lte: lastDay },
+        state: true,
+        status: "tc"
+      }
+    },
+    // Tách từng sản phẩm ra
+    { $unwind: "$products" },
+    // Nhóm theo productId
+    {
+      $group: {
+        _id: "$products.productId",
+        totalSold: { $sum: "$products.quantity" }
+      }
+    },
+    // Chuyển _id (string) thành ObjectId để join
+    {
+      $addFields: {
+        productObjectId: { $toObjectId: "$_id" }
+      }
+    },
+    // Sắp xếp theo số lượng bán
+    { $sort: { totalSold: -1 } },
+    { $skip: skip },
+    { $limit: limit },
+    // Join với bảng sản phẩm
+    {
+      $lookup: {
+        from: "products",
+        localField: "productObjectId",
+        foreignField: "_id",
+        as: "product"
+      }
+    },
+    { $unwind: "$product" },
+    // Join với bảng khuyến mãi
+    {
+      $lookup: {
+        from: "promotions",
+        let: { productId: "$productObjectId" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $in: ["$$productId", "$applicableProducts"] },
+                  { $lte: ["$startDate", new Date()] },
+                  { $gte: ["$endDate", new Date()] }
+                ]
               }
             }
-          ],
-          as: 'promotions'  // Trả về thông tin khuyến mãi cho mỗi sản phẩm
-        }
-      },
-      {
-        $addFields: {
-          hasPromotion: { $gt: [{ $size: "$promotions" }, 0] }  // Kiểm tra nếu sản phẩm có khuyến mãi
-        }
-      },
-      {
-        $match: {
-          // Giữ lại tất cả sản phẩm, chỉ thêm điều kiện này nếu muốn lọc sản phẩm có khuyến mãi
-          // $or: [
-          //   { hasPromotion: true },  // Nếu có khuyến mãi
-          //   { promotions: { $exists: true, $not: { $size: 0 } } }  // Nếu mảng 'promotions' tồn tại và không rỗng
-          // ]
-        }
-      },
-      {
-        $sort: { sold: -1 },  // Sắp xếp sản phẩm theo số lượng bán giảm dần
-      },
-      {
-        $skip: skip,  // Phân trang: bỏ qua số lượng sản phẩm theo `skip`
-      },
-      {
-        $limit: limit,  // Giới hạn số lượng sản phẩm trả về
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          price: 1,
-          sold: 1,
-          rating: 1,
-          desc: 1,
-          quantity: 1,
-          type: 1,
-          img: 1,
-          promotions: 1,  // Trả về thông tin khuyến mãi của sản phẩm
-          hasPromotion: 1  // Trả về thông tin về khuyến mãi
-        }
+          }
+        ],
+        as: "promotions"
       }
-    ];
+    },
+    // Gộp thông tin bán + khuyến mãi vào sản phẩm
+    {
+      $addFields: {
+        "product.promotions": "$promotions",
+        "product.totalSoldThisMonth": "$totalSold"
+      }
+    },
+    // Trả về object sản phẩm hoàn chỉnh
+    {
+      $replaceRoot: { newRoot: "$product" }
+    }
+  ];
 
-    // Thực hiện truy vấn với pipeline đã tạo
-    const products = await Product.aggregate(pipeline);
+  // Chạy pipeline chính
+  const results = await Order.aggregate(pipeline);
 
-    // Tính tổng số sản phẩm thỏa mãn điều kiện
-    const total = await Product.countDocuments({
-      sold: { $gt: 20 },
-      state: true
-    });
+  // Đếm tổng số sản phẩm đã bán trong tháng
+  const totalCountAgg = await Order.aggregate([
+    {
+      $match: {
+        orderDate: { $gte: firstDay, $lte: lastDay },
+        state: true,
+        status: "tc"
+      }
+    },
+    { $unwind: "$products" },
+    {
+      $group: {
+        _id: "$products.productId"
+      }
+    },
+    { $count: "total" }
+  ]);
 
-    // Trả về kết quả bao gồm tổng số sản phẩm và danh sách sản phẩm
-    return {
-      total,
-      products,
-      currentPage: Number(page),
-      totalPages: Math.ceil(total / limit),
-    };
-  } catch (error) {
-    // Xử lý lỗi khi không thể truy vấn dữ liệu
-    throw new Error('Không thể lấy danh sách sản phẩm: ' + error.message);
-  }
+  const total = totalCountAgg[0]?.total || 0;
+
+  return {
+    total,
+    currentPage: Number(page),
+    totalPages: Math.ceil(total / limit),
+    products: results
+  };
 };
+
 
 const getProductById = async (productId) => {
   console.log('Received productId:', productId);  // Kiểm tra giá trị productId đã nhận
