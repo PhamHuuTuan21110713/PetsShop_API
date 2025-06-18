@@ -203,7 +203,7 @@ const getCategoryById = (id, condition, paging, sort = { sold: -1 }) => {
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ["$state", true] } ,
+                                                    { $eq: ["$state", true] },
                                                     { $in: ["$$productId", "$applicableProducts"] }, // Kiểm tra xem productId có trong applicableProducts
                                                     { $lte: ["$startDate", new Date()] }, // startDate <= ngày hiện tại
                                                     { $gte: ["$endDate", new Date()] } // endDate >= ngày hiện tại
@@ -418,54 +418,55 @@ const createNewCategory = (data) => {
 }
 
 const getCategorySales = async (filters) => {
-  try {
-    const { year, month, quarter } = filters;
+    try {
+        const { year, month, quarter } = filters;
 
-    //console.log("filter", year);
-    
-    const orders = await Order.find({});
-    const filteredOrders = orders.filter(order => {
-      const date = dayjs(order.orderDate);
-      return (!month || date.month() + 1 === parseInt(month)) &&
-             (!quarter || Math.ceil((date.month() + 1) / 3) === parseInt(quarter)) &&
-             (!year || date.year() === parseInt(year));
-    });
+        //console.log("filter", year);
 
-    const products = await Product.find({});
-    const categories = await Category.find({});
+        const orders = await Order.find({});
+        const filteredOrders = orders.filter(order => {
+            const date = dayjs(order.orderDate);
+            return order.status === 'tc' &&
+                (!month || date.month() + 1 === parseInt(month)) &&
+                (!quarter || Math.ceil((date.month() + 1) / 3) === parseInt(quarter)) &&
+                (!year || date.year() === parseInt(year));
+        });
 
-    const result = categories.map(category => {
-      const categoryProducts = products.filter(p => p.categoryId === category._id.toString());
-      let quantitySold = 0;
-      let revenue = 0;
+        const products = await Product.find({});
+        const categories = await Category.find({});
 
-      for (const order of filteredOrders) {
-        for (const item of order.products) {
-          const product = categoryProducts.find(p => p._id.toString() === item.productId);
-          if (product) {
-            quantitySold += item.quantity;
-            revenue += item.quantity * product.price;
-          }
-        }
-      }
+        const result = categories.map(category => {
+            const categoryProducts = products.filter(p => p.categoryId === category._id.toString());
+            let quantitySold = 0;
+            let revenue = 0;
 
-      return {
-        category: category.name,
-        quantitySold,
-        revenue,
-      };
-    });
+            for (const order of filteredOrders) {
+                for (const item of order.products) {
+                    const product = categoryProducts.find(p => p._id.toString() === item.productId);
+                    if (product) {
+                        quantitySold += item.quantity;
+                        revenue += item.quantity * product.price;
+                    }
+                }
+            }
 
-    return {
-      status: "OK",
-      message: "Lấy thống kê doanh số theo danh mục thành công",
-      data: result,
-    };
-  } catch (error) {
-    // Bắt lỗi, có thể log hoặc trả về lỗi cụ thể
-    console.error("Error in getCategorySales:", error);
-    throw error;  // hoặc return một object lỗi
-  }
+            return {
+                category: category.name,
+                quantitySold,
+                revenue,
+            };
+        });
+
+        return {
+            status: "OK",
+            message: "Lấy thống kê doanh số theo danh mục thành công",
+            data: result,
+        };
+    } catch (error) {
+        // Bắt lỗi, có thể log hoặc trả về lỗi cụ thể
+        console.error("Error in getCategorySales:", error);
+        throw error;  // hoặc return một object lỗi
+    }
 };
 
 

@@ -2,7 +2,7 @@
 import * as OrderService from "../services/OrderService.js";
 
 const createOrder = async (req, res) => {
-  console.log("controller", typeof req.body.products);
+  console.log("controller", req.body.shippingFee);
 
   try {
     const response = await OrderService.createOrder(req.body);
